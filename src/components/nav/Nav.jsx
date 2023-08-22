@@ -7,6 +7,8 @@ const Nav = ({ onClick }) => {
   const test2 = ['홍', '길', '동'];
   const [name, setName] = useState('');
   const [format, setFormat] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const onChange = ({ target: { value } }) => {
     setName(value);

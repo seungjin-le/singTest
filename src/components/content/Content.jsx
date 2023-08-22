@@ -9,7 +9,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
   const [droppedItems, setDroppedItems] = useState([]);
   const [droppedPositions, setDroppedPositions] = useState([]);
   const [{ isOver }, drop] = useDrop({
-    accept: 'INPUT',
+    accept: 'TEXTAREA',
     drop: (item, monitor) => {
       const clientOffset = monitor.getClientOffset();
 
@@ -20,7 +20,27 @@ const Content = ({ stamp, onClick, setStamp }) => {
       const y =
         clientOffset.y - dropTargetRect.top - window.scrollY - item.offset.y;
 
-      setDroppedPositions((prev) => [...prev, { x: x, y: y }]);
+      const existingItemIndex = droppedItems.findIndex((i) => i.id === item.id);
+      console.log(item.fromNav, isOver);
+      console.log(existingItemIndex);
+      if (existingItemIndex > -1) {
+        // Update the position of the existing item
+        setDroppedPositions((prev) => {
+          const updatedPositions = [...prev];
+          updatedPositions[existingItemIndex] = { x, y };
+          return updatedPositions;
+        });
+      } else if (item.fromNav) {
+        setDroppedItems((prev) => [...prev, item]);
+        setDroppedPositions((prev) => [...prev, { x, y }]);
+      } else {
+        // Optionally, update the position of the existing item
+        setDroppedPositions((prev) => {
+          const updatedPositions = [...prev];
+          updatedPositions[existingItemIndex] = { x, y };
+          return updatedPositions;
+        });
+      }
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
@@ -37,7 +57,6 @@ const Content = ({ stamp, onClick, setStamp }) => {
         'h-full w-full flex flex-col items-center justify-start p-12 relative box-border'
       }
       ref={combinedRef}>
-      <span className={'absolute w-full h-full bg-[red] top-0 left-0 -z-40'} />
       <button className={'border-amber-50 border-2'} onClick={onClick}>
         <SignatureCanvas
           canvasProps={{
