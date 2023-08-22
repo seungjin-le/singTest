@@ -2,13 +2,14 @@ import Content from './components/content/Content';
 import Nav from './components/nav/Nav';
 import { useState } from 'react';
 import domtoimage from 'dom-to-image';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 function App() {
   const [stamp, setStamp] = useState('');
   const onDownloadBtn = ({ target }) => {
     domtoimage.toBlob(target).then((blob) => {
       // saveAs(blob, 'card.png');
-      console.log(blob);
       setStamp(window.URL.createObjectURL(blob));
       const canvas = document.getElementById('signCanvas');
       const ctx = canvas.getContext('2d');
@@ -20,11 +21,13 @@ function App() {
     });
   };
   return (
-    <div className={'w-full h-full flex flex-row'}>
-      <Nav onClick={onDownloadBtn} />
+    <DndProvider backend={HTML5Backend}>
+      <div className={'w-full h-full flex flex-row'}>
+        <Nav onClick={onDownloadBtn} />
 
-      <Content stamp={stamp} setStamp={setStamp} onClick={onDownloadBtn} />
-    </div>
+        <Content stamp={stamp} setStamp={setStamp} onClick={onDownloadBtn} />
+      </div>
+    </DndProvider>
   );
 }
 

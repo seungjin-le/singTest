@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 const ImageTest = ({ children, stamp, setStamp }) => {
   const [size, setSize] = useState({ x: 200, y: 200 });
   const [boxPos, setBoxPos] = useState({ x: 100, y: 100 });
-
+  const [active, setActive] = useState(false);
   const handler = (mouseDownEvent) => {
     const startSize = size;
     const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
@@ -38,6 +38,7 @@ const ImageTest = ({ children, stamp, setStamp }) => {
   const deleteHandler = (mouseDownEvent) => {
     setStamp('');
   };
+
   return (
     <div className={'w-[600px] h-[600px] bg-sky-100 mt-4'}>
       <div className={'text-center mt-1'}>계약서</div>
@@ -53,35 +54,41 @@ const ImageTest = ({ children, stamp, setStamp }) => {
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'contain',
           }}
+          onMouseOver={() => setActive(true)}
+          onMouseOut={() => setActive(false)}
           className={
-            'relative border-2 border-amber-800 min-w-[100px] min-h-[100px]'
+            'relative min-w-[100px] min-h-[100px] cursor-pointer hover:border-amber-800 hover:border-2'
           }>
-          <button
-            id="draghandle"
-            type="button"
-            onMouseDown={handler}
-            className={
-              'absolute bottom-0 right-0 translate-x-p50 translate-y-p50 w-[12px] h-[12px] bg-red-600 rounded-full z-10'
-            }
-          />
+          {active && (
+            <Fragment>
+              <button
+                id="draghandle"
+                type="button"
+                onMouseDown={handler}
+                className={
+                  'absolute bottom-0 right-0 translate-x-p50 translate-y-p50 w-[12px] h-[12px] bg-red-600 rounded-full z-10'
+                }
+              />
 
-          <button
-            id="pos"
-            type="button"
-            onMouseDown={handler2}
-            className={
-              'absolute bottom-1/2 right-1/2 translate-x-p50 translate-y-p50 border-2 border-red-600 p-2 w-full h-full'
-            }
-          />
-          <button
-            id="delete"
-            type="button"
-            onClick={deleteHandler}
-            className={
-              'absolute p-2 px-4 top-0 left-full translate-x-m50 translate-y-m50 bg-red-400 rounded-full'
-            }>
-            x
-          </button>
+              <button
+                id="pos"
+                type="button"
+                onMouseDown={handler2}
+                className={
+                  'absolute bottom-1/2 right-1/2 translate-x-p50 translate-y-p50 border-2 border-red-600 p-2 w-full h-full'
+                }
+              />
+              <button
+                id="delete"
+                type="button"
+                onClick={deleteHandler}
+                className={
+                  'absolute p-2 px-4 top-0 left-full translate-x-m50 translate-y-m50 bg-red-400 rounded-full'
+                }>
+                x
+              </button>
+            </Fragment>
+          )}
         </div>
       )}
     </div>
