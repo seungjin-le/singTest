@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { TextField } from '@mui/material';
 import DragaInputText from '../dragas/DragaInputText';
+import DragaCheckBox from '../dragas/DragaCheckBox';
 
 const Nav = ({ onClick }) => {
-  const test = ['홍', '길', '동'];
-  const test2 = ['홍', '길', '동'];
+  const defaultName = ['홍', '길', '동'];
   const [name, setName] = useState('');
   const [format, setFormat] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -44,7 +44,7 @@ const Nav = ({ onClick }) => {
               }>
               {format.length > 2
                 ? format.map((item) => <span>{item}</span>)
-                : test.map((item) => <span>{item}</span>)}
+                : defaultName.map((item) => <span>{item}</span>)}
             </span>
           </div>
           <div className={'flex flex-col '}>
@@ -56,7 +56,9 @@ const Nav = ({ onClick }) => {
               }>
               {format.length > 2
                 ? format.map((item) => <span className={'m-1'}>{item}</span>)
-                : test2.map((item) => <span className={'m-1'}>{item}</span>)}
+                : defaultName.map((item) => (
+                    <span className={'m-1'}>{item}</span>
+                  ))}
               <span className={'m-1'}>인</span>
             </span>
           </div>
@@ -70,7 +72,9 @@ const Nav = ({ onClick }) => {
               }>
               {format.length > 2
                 ? format.map((item) => <span className={'m-1'}>{item}</span>)
-                : test.map((item) => <span className={'m-1'}>{item}</span>)}
+                : defaultName.map((item) => (
+                    <span className={'m-1'}>{item}</span>
+                  ))}
               <span className={'m-1'}>인</span>
             </span>
           </div>
@@ -78,6 +82,7 @@ const Nav = ({ onClick }) => {
       </div>
 
       <DragaInputText />
+      <DragaCheckBox />
     </div>
   );
 };

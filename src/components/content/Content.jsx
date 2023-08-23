@@ -1,51 +1,72 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import ImageTest from './ImageTest';
 import { useDrop } from 'react-dnd';
 import DragaInputText from '../dragas/DragaInputText';
+import DragaCheckBox from '../dragas/DragaCheckBox';
 const Content = ({ stamp, onClick, setStamp }) => {
   const canvasSign = useRef();
   const dropRef = useRef(null);
   const [droppedItems, setDroppedItems] = useState([]);
-  const [droppedPositions, setDroppedPositions] = useState([]);
-  const [{ isOver }, drop] = useDrop({
-    accept: 'TEXTAREA',
-    drop: (item, monitor) => {
-      const clientOffset = monitor.getClientOffset();
 
-      const dropTargetRect = dropRef.current.getBoundingClientRect();
-
-      const x =
-        clientOffset.x - dropTargetRect.left - window.scrollX - item.offset.x;
-      const y =
-        clientOffset.y - dropTargetRect.top - window.scrollY - item.offset.y;
-
-      const existingItemIndex = droppedItems.findIndex((i) => i.id === item.id);
-      console.log(item.fromNav, isOver);
-      console.log(existingItemIndex);
-      if (existingItemIndex > -1) {
-        // Update the position of the existing item
-        setDroppedPositions((prev) => {
-          const updatedPositions = [...prev];
-          updatedPositions[existingItemIndex] = { x, y };
-          return updatedPositions;
-        });
-      } else if (item.fromNav) {
-        setDroppedItems((prev) => [...prev, item]);
-        setDroppedPositions((prev) => [...prev, { x, y }]);
-      } else {
-        // Optionally, update the position of the existing item
-        setDroppedPositions((prev) => {
-          const updatedPositions = [...prev];
-          updatedPositions[existingItemIndex] = { x, y };
-          return updatedPositions;
-        });
-      }
+  const handleOnClickDelete = useCallback(
+    (id) => {
+      console.log(id);
+      const newItems = droppedItems;
+      console.log(newItems);
+      setDroppedItems(
+        newItems
+          .filter((item) => item.id !== id)
+          ?.map((item, index) => {
+            return { ...item, id: `${item.type}-${index}` };
+          })
+      );
     },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  });
+    [droppedItems]
+  );
+
+  const [collect, drop] = useDrop(
+    {
+      accept: ['TEXTAREA', 'CHECKBOX'],
+      drop: (item, monitor) => {
+        const clientOffset = monitor.getClientOffset();
+
+        const dropTargetRect = dropRef.current.getBoundingClientRect();
+
+        const x =
+          clientOffset.x - dropTargetRect.left - window.scrollX - item.offset.x;
+        const y =
+          clientOffset.y - dropTargetRect.top - window.scrollY - item.offset.y;
+        const check = droppedItems.findIndex(({ id }, index) => item.id === id);
+        console.log(item);
+        if (check === -1) {
+          setDroppedItems((prev) => [
+            ...prev,
+            {
+              ...item,
+              id: `${item.type}-${droppedItems.length}`,
+              offset: {
+                x: x,
+                y: y,
+              },
+            },
+          ]);
+          // setDroppedPositions((prev) => [...prev, { x, y }]);
+        } else {
+          setDroppedItems((prev) => {
+            return prev.map((item, index) =>
+              index === check ? { ...item, offset: { x: x, y: y } } : item
+            );
+          });
+        }
+      },
+      collect: (monitor) => ({
+        isOver: monitor.isOver(),
+        highlighted: monitor.canDrop(),
+      }),
+    },
+    [droppedItems]
+  );
   const combinedRef = (node) => {
     drop(node);
     dropRef.current = node;
@@ -54,7 +75,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
   return (
     <div
       className={
-        'h-full w-full flex flex-col items-center justify-start p-12 relative box-border'
+        'h-full w-full flex flex-col items-center justify-start p-12 relative box-border overflow-hidden'
       }
       ref={combinedRef}>
       <button className={'border-amber-50 border-2'} onClick={onClick}>
@@ -68,16 +89,43 @@ const Content = ({ stamp, onClick, setStamp }) => {
           ref={canvasSign}
         />
       </button>
-      {droppedPositions.map((pos, index) => (
-        <DragaInputText
-          key={index}
-          style={{
-            position: 'absolute',
-            left: pos.x,
-            top: pos.y,
-          }}
-        />
-      ))}
+      {droppedItems.map((item, index) => {
+        switch (item.type) {
+          case 'textArea':
+            return (
+              <DragaInputText
+                key={index}
+                index={index}
+                style={{
+                  position: 'absolute',
+                  left: item.offset.x,
+                  top: item.offset.y,
+                }}
+                onDelete={handleOnClickDelete}
+                item={item}
+                setState={setDroppedItems}
+              />
+            );
+          case 'checkBox':
+            return (
+              <DragaCheckBox
+                key={index}
+                index={index}
+                style={{
+                  position: 'absolute',
+                  left: item.offset.x,
+                  top: item.offset.y,
+                }}
+                onDelete={handleOnClickDelete}
+                item={item}
+                setState={setDroppedItems}
+              />
+            );
+          default: {
+            return null;
+          }
+        }
+      })}
 
       <ImageTest stamp={stamp} setStamp={setStamp} />
     </div>
