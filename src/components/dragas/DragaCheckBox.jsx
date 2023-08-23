@@ -45,22 +45,20 @@ const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
     drag(node);
     ref.current = node;
   };
-
+  console.log(style, size);
   return (
     <Fragment>
       <div
         style={{
-          ...style,
+          position: style.position,
         }}
         onMouseOver={() => setMouseOver(true)}
         onMouseOut={() => setMouseOver(false)}
-        className={
-          'relative w-auto h-auto p-3 flex items-center justify-center'
-        }>
+        className={' w-auto h-auto p-3 flex items-center justify-center'}>
         <CustomCheckbox
           ref={combinedRef}
           type="checkbox"
-          className={'checked:content-[v]'}
+          className={'min-h-[20px] min-w-[20px]'}
           style={{
             width: size.x,
             height: size.y,
@@ -70,7 +68,7 @@ const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
           <Fragment>
             <span
               className={
-                'absolute w-2 h-2 bg-[red] top-full translate-x-m50 translate-y-m50 rounded-full cursor-pointer'
+                'absolute w-2 h-2 bg-[red] left-full top-full translate-x-m100 translate-y-m100 rounded-full cursor-pointer'
               }
               onMouseDown={handlerReSizing}
             />
@@ -85,7 +83,30 @@ const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
         )}
       </div>
 
-      <PostionLine style={style} disabled={mouseOver} size={size} />
+      <span
+        style={{ left: style?.left }}
+        className={
+          'left-line absolute left-0 top-0  h-full w-[1px] translate-x-1 border-l-[2px] border-red-600 border-dotted'
+        }
+      />
+      <span
+        style={{ left: style?.left + size.x }}
+        className={
+          'right-line absolute left-full top-0  h-full w-[1px] -translate-x-1 border-r-[2px] border-red-600 border-dotted'
+        }
+      />
+      <span
+        style={{ top: style?.top }}
+        className={
+          'top-line absolute h-[1px] w-full translate-y-1 border-t-[2px] border-red-600 border-dotted'
+        }
+      />
+      <span
+        style={{ top: style?.top + size.y }}
+        className={
+          'bottom-line absolute h-[1px] w-full -translate-y-1 border-b-[2px] border-red-600 border-dotted'
+        }
+      />
     </Fragment>
   );
 };

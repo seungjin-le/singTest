@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 
-const PostionLine = ({ style, disable = false, size }) => {
+const PostionLine = ({ style, disable, size }) => {
+  console.log(disable, size, style);
   return (
     <Fragment>
       {disable ? (
@@ -20,13 +21,13 @@ const PostionLine = ({ style, disable = false, size }) => {
           <span
             style={{ top: style?.top }}
             className={
-              'top-line absolute left-full left-0  h-[1px] w-full translate-y-1 border-t-[2px] border-red-600 border-dotted'
+              'top-line absolute h-[1px] w-full translate-y-1 border-t-[2px] border-red-600 border-dotted'
             }
           />
           <span
             style={{ top: style?.top + size.y }}
             className={
-              'bottom-line absolute left-full left-0  h-[1px] w-full -translate-y-1 border-b-[2px] border-red-600 border-dotted'
+              'bottom-line absolute h-[1px] w-full -translate-y-1 border-b-[2px] border-red-600 border-dotted'
             }
           />
         </Fragment>
