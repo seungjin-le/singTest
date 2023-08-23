@@ -1,11 +1,10 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import styled from 'styled-components';
-import PostionLine from './PostionLine';
 
 const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
   const ref = useRef(null);
-  const [size, setSize] = useState({ x: 20, y: 20 });
+  const [size, setSize] = useState({ x: 25, y: 25 });
   const [mouseOver, setMouseOver] = useState(false);
 
   const [{ isDragging }, drag] = useDrag({
@@ -29,10 +28,17 @@ const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
     const startSize = size;
     const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
     const onMouseMove = (mouseMoveEvent) => {
-      setSize((currentSize) => ({
-        x: startSize.x - startPosition.x + mouseMoveEvent.pageX,
-        y: startSize.y - startPosition.y + mouseMoveEvent.pageY,
-      }));
+      const deltaX = mouseMoveEvent.pageX - startPosition.x;
+      const deltaY = mouseMoveEvent.pageY - startPosition.y;
+
+      const maxDelta = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+      const directionX = deltaX >= 0 ? 1 : -1;
+      const newSize = startSize.x + directionX * maxDelta;
+
+      setSize({
+        x: Math.max(newSize, 25), // Ensure X-axis width is at least 25px
+        y: Math.max(newSize, 25), // Y-axis is still determined by newSize
+      });
     };
     const onMouseUp = () => {
       document.body.removeEventListener('mousemove', onMouseMove);
@@ -45,20 +51,22 @@ const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
     drag(node);
     ref.current = node;
   };
-  console.log(style, size);
+
   return (
     <Fragment>
       <div
         style={{
-          position: style.position,
+          ...style,
         }}
         onMouseOver={() => setMouseOver(true)}
         onMouseOut={() => setMouseOver(false)}
-        className={' w-auto h-auto p-3 flex items-center justify-center'}>
+        className={
+          'flex items-center justify-center m-0 p-0 min-w-[25px] min-h-[25px]'
+        }>
         <CustomCheckbox
           ref={combinedRef}
           type="checkbox"
-          className={'min-h-[20px] min-w-[20px]'}
+          className={'min-h-[25px] min-w-[25px]'}
           style={{
             width: size.x,
             height: size.y,
@@ -68,49 +76,56 @@ const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
           <Fragment>
             <span
               className={
-                'absolute w-2 h-2 bg-[red] left-full top-full translate-x-m100 translate-y-m100 rounded-full cursor-pointer'
+                'absolute w-3 h-3 bg-[red] left-full top-full translate-x-m100 translate-y-m100 rounded-full cursor-pointer z-10'
               }
               onMouseDown={handlerReSizing}
             />
             <button
               onClick={() => onDelete(item?.id)}
               className={
-                'absolute left-full top-0 inline px-2 bg-red-400 rounded-full flex items-center justify-center translate-x-m50 translate-y-m50'
+                'absolute left-full top-0 px-2 bg-red-400 rounded-full flex items-center justify-center translate-x-m50 translate-y-m50 z-10'
               }>
               x
             </button>
           </Fragment>
         )}
       </div>
-
-      <span
-        style={{ left: style?.left }}
-        className={
-          'left-line absolute left-0 top-0  h-full w-[1px] translate-x-1 border-l-[2px] border-red-600 border-dotted'
-        }
-      />
-      <span
-        style={{ left: style?.left + size.x }}
-        className={
-          'right-line absolute left-full top-0  h-full w-[1px] -translate-x-1 border-r-[2px] border-red-600 border-dotted'
-        }
-      />
-      <span
-        style={{ top: style?.top }}
-        className={
-          'top-line absolute h-[1px] w-full translate-y-1 border-t-[2px] border-red-600 border-dotted'
-        }
-      />
-      <span
-        style={{ top: style?.top + size.y }}
-        className={
-          'bottom-line absolute h-[1px] w-full -translate-y-1 border-b-[2px] border-red-600 border-dotted'
-        }
-      />
+      {mouseOver && (
+        <Fragment>
+          <span
+            style={{ left: style?.left }}
+            className={
+              'left-line absolute left-0 top-0  h-full w-[1px] translate-x-0 border-l-[2px] border-red-600 border-dotted'
+            }
+          />
+          <span
+            style={{ left: style?.left + size.x }}
+            className={
+              'right-line absolute left-full top-0  h-full w-[1px] translate-x-0 border-r-[2px] border-red-600 border-dotted'
+            }
+          />
+          <span
+            style={{ top: style?.top }}
+            className={
+              'top-line absolute h-[1px] w-full translate-y-0 border-t-[2px] border-red-600 border-dotted'
+            }
+          />
+          <span
+            style={{ top: style?.top + size.y }}
+            className={
+              'bottom-line absolute h-[1px] w-full translate-y-0 border-b-[2px] border-red-600 border-dotted'
+            }
+          />
+        </Fragment>
+      )}
     </Fragment>
   );
 };
 
 export default DragaCheckBox;
 
-const CustomCheckbox = styled.input``;
+const CustomCheckbox = styled.input`
+  margin: 0;
+  border: 0;
+  box-sizing: border-box;
+`;

@@ -1,9 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import ImageTest from './ImageTest';
 import { useDrop } from 'react-dnd';
 import DragaInputText from '../dragas/DragaInputText';
 import DragaCheckBox from '../dragas/DragaCheckBox';
+import DragLayer from '../../container/layout/DragLayout';
+
 const Content = ({ stamp, onClick, setStamp }) => {
   const canvasSign = useRef();
   const dropRef = useRef(null);
@@ -11,9 +13,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
 
   const handleOnClickDelete = useCallback(
     (id) => {
-      console.log(id);
       const newItems = droppedItems;
-      console.log(newItems);
       setDroppedItems(
         newItems
           .filter((item) => item.id !== id)

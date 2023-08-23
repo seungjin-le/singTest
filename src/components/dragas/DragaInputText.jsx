@@ -1,11 +1,12 @@
 import React, { Fragment, memo, useEffect, useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
-import PostionLine from './PostionLine';
+import PositionLine from './PositionLine';
 
 const DragaInputText = ({ style, index, onDelete, item, setState }) => {
   const ref = useRef(null);
   const [size, setSize] = useState({ x: 200, y: 50 });
   const [mouseOver, setMouseOver] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
 
   const [{ isDragging }, drag] = useDrag({
     type: 'TEXTAREA',
@@ -37,11 +38,15 @@ const DragaInputText = ({ style, index, onDelete, item, setState }) => {
   const handlerReSizing = (mouseDownEvent) => {
     const startSize = size;
     const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
+
     const onMouseMove = (mouseMoveEvent) => {
-      setSize((currentSize) => ({
-        x: startSize.x - startPosition.x + mouseMoveEvent.pageX,
-        y: startSize.y - startPosition.y + mouseMoveEvent.pageY,
-      }));
+      const newX = startSize.x - startPosition.x + mouseMoveEvent.pageX;
+      const newY = startSize.y - startPosition.y + mouseMoveEvent.pageY;
+
+      setSize({
+        x: Math.max(newX, 100),
+        y: Math.max(newY, 45),
+      });
     };
     const onMouseUp = () => {
       document.body.removeEventListener('mousemove', onMouseMove);
@@ -49,6 +54,30 @@ const DragaInputText = ({ style, index, onDelete, item, setState }) => {
 
     document.body.addEventListener('mousemove', onMouseMove);
     document.body.addEventListener('mouseup', onMouseUp, { once: true });
+  };
+
+  const handlerOnMouseDown = (mouseDownEvent) => {
+    setMouseOver(true);
+    const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
+
+    const onBoxMove = (mouseMoveEvent) => {
+      const deltaX = mouseMoveEvent.pageX - startPosition.x;
+      const deltaY = mouseMoveEvent.pageY - startPosition.y;
+
+      setDragStartPos((currentStyle) => ({
+        ...currentStyle,
+        left: currentStyle.left + deltaX,
+        top: currentStyle.top + deltaY,
+      }));
+    };
+
+    const onMouseUp = () => {
+      document.body.removeEventListener('mousemove', onBoxMove);
+    };
+
+    document.body.addEventListener('mousemove', onBoxMove);
+    document.body.addEventListener('mouseup', onMouseUp, { once: true });
+    console.log(style);
   };
   const combinedRef = (node) => {
     drag(node);
@@ -62,10 +91,11 @@ const DragaInputText = ({ style, index, onDelete, item, setState }) => {
           width: size.x,
           height: size.y,
         }}
-        onMouseOver={() => setMouseOver(true)}
+        onMouseOver={handlerOnMouseDown}
         onMouseOut={() => setMouseOver(false)}
+        onMouseDown={handlerOnMouseDown}
         className={
-          'w-auto h-auto flex  items-center justify-center box-border focus:bg-red-400 p-1'
+          'w-auto h-auto flex  items-center justify-center box-border focus:bg-red-400 p-1 min-h-[45px] min-w-[100px]'
         }>
         <div className={'relative w-full h-full'}>
           <textarea
@@ -78,14 +108,14 @@ const DragaInputText = ({ style, index, onDelete, item, setState }) => {
             <Fragment>
               <span
                 className={
-                  'absolute w-2 h-2 bg-[red] top-full translate-x-m50 translate-y-m50 rounded-full cursor-pointer'
+                  'absolute w-2 h-2 bg-[red] top-full translate-x-m30 translate-y-m30 rounded-full cursor-pointer z-10'
                 }
                 onMouseDown={handlerReSizing}
               />
               <button
                 onClick={() => onDelete(item?.id)}
                 className={
-                  'absolute left-full top-0 inline px-2 bg-red-400 rounded-full flex items-center justify-center translate-x-m50 translate-y-m50'
+                  'absolute left-full top-0 px-2 bg-red-400 rounded-full flex items-center justify-center translate-x-m50 translate-y-m50 z-10'
                 }>
                 x
               </button>
@@ -93,7 +123,7 @@ const DragaInputText = ({ style, index, onDelete, item, setState }) => {
           )}
         </div>
       </div>
-      <PostionLine style={style} disabled={mouseOver} size={size} />
+      <PositionLine style={style} disable={mouseOver} size={size} />
     </Fragment>
   );
 };
