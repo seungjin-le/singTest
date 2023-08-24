@@ -1,16 +1,14 @@
-import React, { useCallback, useRef, useState } from 'react';
-import SignatureCanvas from 'react-signature-canvas';
-import ImageTest from './ImageTest';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import DragaInputText from '../dragas/DragaInputText';
 import DragaCheckBox from '../dragas/DragaCheckBox';
-import DragLayer from '../../container/layout/DragLayout';
+import PdfView from '../../container/pdf/PdfView';
+import PdfScaleSlider from '../toolTips/PdfScaleSlider';
 
 const Content = ({ stamp, onClick, setStamp }) => {
-  const canvasSign = useRef();
   const dropRef = useRef(null);
   const [droppedItems, setDroppedItems] = useState([]);
-
+  const [scale, setScale] = useState(1);
   const handleOnClickDelete = useCallback(
     (id) => {
       const newItems = droppedItems;
@@ -24,7 +22,68 @@ const Content = ({ stamp, onClick, setStamp }) => {
     },
     [droppedItems]
   );
-
+  const handleOnChangeTooltip = useCallback(
+    ({ target: { value } }, id, type) => {
+      if (type === 'fontSize') {
+        setDroppedItems((prev) => {
+          return prev.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  fontSet: {
+                    ...item.fontSet,
+                    fontSize: value,
+                  },
+                }
+              : item
+          );
+        });
+      } else if (type === 'textSort') {
+        setDroppedItems((prev) => {
+          return prev.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  fontSet: {
+                    ...item.fontSet,
+                    textAlign: value,
+                  },
+                }
+              : item
+          );
+        });
+      } else if (type === 'textColor') {
+        setDroppedItems((prev) => {
+          return prev.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  fontSet: {
+                    ...item.fontSet,
+                    color: value,
+                  },
+                }
+              : item
+          );
+        });
+      } else if (type === 'textWeight') {
+        setDroppedItems((prev) => {
+          return prev.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  fontSet: {
+                    ...item.fontSet,
+                    fontWeight: value,
+                  },
+                }
+              : item
+          );
+        });
+      }
+    },
+    [droppedItems]
+  );
   const [collect, drop] = useDrop(
     {
       accept: ['TEXTAREA', 'CHECKBOX'],
@@ -38,7 +97,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
         const y =
           clientOffset.y - dropTargetRect.top - window.scrollY - item.offset.y;
         const check = droppedItems.findIndex(({ id }, index) => item.id === id);
-        console.log(item);
+
         if (check === -1) {
           setDroppedItems((prev) => [
             ...prev,
@@ -49,9 +108,14 @@ const Content = ({ stamp, onClick, setStamp }) => {
                 x: x,
                 y: y,
               },
+              fontSet: {
+                fontSize: '14px',
+                textAlign: 'left',
+                color: '#000000',
+                fontWeight: '400',
+              },
             },
           ]);
-          // setDroppedPositions((prev) => [...prev, { x, y }]);
         } else {
           setDroppedItems((prev) => {
             return prev.map((item, index) =>
@@ -71,65 +135,66 @@ const Content = ({ stamp, onClick, setStamp }) => {
     drop(node);
     dropRef.current = node;
   };
+  useEffect(() => {
+    console.log(droppedItems);
+  }, [droppedItems]);
 
   return (
     <div
       className={
-        'h-full w-full flex flex-col items-center justify-start p-12 relative box-border overflow-hidden'
-      }
-      ref={combinedRef}>
-      <button className={'border-amber-50 border-2'} onClick={onClick}>
-        <SignatureCanvas
-          canvasProps={{
-            id: 'signCanvas',
-            className: 'signature-canvas',
-            width: 500,
-            height: 250,
-          }}
-          ref={canvasSign}
-        />
-      </button>
-      {droppedItems.map((item, index) => {
-        switch (item.type) {
-          case 'textArea':
-            return (
-              <DragaInputText
-                key={index}
-                index={index}
-                style={{
-                  position: 'absolute',
-                  left: item.offset.x,
-                  top: item.offset.y,
-                }}
-                onDelete={handleOnClickDelete}
-                item={item}
-                setState={setDroppedItems}
-              />
-            );
-          case 'checkBox':
-            return (
-              <DragaCheckBox
-                key={index}
-                index={index}
-                style={{
-                  position: 'absolute',
-                  left: item.offset.x,
-                  top: item.offset.y,
-                }}
-                onDelete={handleOnClickDelete}
-                item={item}
-                setState={setDroppedItems}
-              />
-            );
-          default: {
-            return null;
-          }
+        'h-full w-full flex flex-col items-center justify-start  relative box-border overflow-hidden'
+      }>
+      <div
+        className={
+          'w-full h-full flex-col items-center justify-center overflow-y-scroll'
         }
-      })}
+        style={{ transform: `scale(${scale}, ${scale})` }}>
+        <PdfView stamp={stamp} setStamp={setStamp} combinedRef={combinedRef}>
+          {droppedItems.map((item, index) => {
+            switch (item.type) {
+              case 'textArea':
+                return (
+                  <DragaInputText
+                    key={index}
+                    index={index}
+                    style={{
+                      position: 'absolute',
+                      left: item.offset.x,
+                      top: item.offset.y,
+                      fontSize: item.fontSize,
+                    }}
+                    onDelete={handleOnClickDelete}
+                    item={item}
+                    setState={setDroppedItems}
+                    onChange={handleOnChangeTooltip}
+                  />
+                );
+              case 'checkBox':
+                return (
+                  <DragaCheckBox
+                    key={index}
+                    index={index}
+                    style={{
+                      position: 'absolute',
+                      left: item.offset.x,
+                      top: item.offset.y,
+                    }}
+                    onDelete={handleOnClickDelete}
+                    item={item}
+                    setState={setDroppedItems}
+                  />
+                );
+              default: {
+                return null;
+              }
+            }
+          })}
+        </PdfView>
+      </div>
 
-      <ImageTest stamp={stamp} setStamp={setStamp} />
+      <PdfScaleSlider value={scale} setValue={setScale} />
     </div>
   );
 };
 
-export default Content;
+export default memo(Content);

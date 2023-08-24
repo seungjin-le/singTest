@@ -61,7 +61,7 @@ const DragaCheckBox = ({ style, index, onDelete, item, setState }) => {
         onMouseOver={() => setMouseOver(true)}
         onMouseOut={() => setMouseOver(false)}
         className={
-          'flex items-center justify-center m-0 p-0 min-w-[25px] min-h-[25px]'
+          'flex items-center justify-center m-0 p-0 min-w-[25px] min-h-[25px] z-5'
         }>
         <CustomCheckbox
           ref={combinedRef}

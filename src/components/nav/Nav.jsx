@@ -1,12 +1,23 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { TextField } from '@mui/material';
 import DragaInputText from '../dragas/DragaInputText';
 import DragaCheckBox from '../dragas/DragaCheckBox';
+import SignatureCanvas from 'react-signature-canvas';
+
+const fonts = [
+  'JSArirang',
+  'SUITThin',
+  'IceSotongRg',
+  'kdg_Medium',
+  'Somi',
+  'HakgyoansimButpenB',
+];
 
 const Nav = ({ onClick }) => {
   const defaultName = ['홍', '길', '동'];
   const [name, setName] = useState('');
   const [format, setFormat] = useState([]);
+  const canvasSign = useRef();
   // const [isDragging, setIsDragging] = useState(false);
   // const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -14,6 +25,10 @@ const Nav = ({ onClick }) => {
     setName(value);
     setFormat(value.slice(0, 3).split(''));
   };
+  const [stamp, setStamp] = useState({
+    shape: '',
+    font: '',
+  });
 
   return (
     <div
@@ -40,7 +55,7 @@ const Nav = ({ onClick }) => {
             <span
               onClick={onClick}
               className={
-                'border-4 border-red-600 rounded-[40px/100px] text-center p-3 flex flex-col z-10'
+                'border-4 border-red-600 rounded-[40px/100px] text-center p-2 flex flex-col z-10'
               }>
               {format.length > 2
                 ? format.map((item) => <span>{item}</span>)
@@ -52,7 +67,7 @@ const Nav = ({ onClick }) => {
             <span
               onClick={onClick}
               className={
-                'border-4 border-red-600 w-[90px] h-[90px] text-center p-3 rounded-full flex flex-row flex-wrap items-center justify-center z-10'
+                'border-4 border-red-600 w-[80px] h-[80px] text-center p-2 rounded-full flex flex-row flex-wrap items-center justify-center z-10'
               }>
               {format.length > 2
                 ? format.map((item) => <span className={'m-1'}>{item}</span>)
@@ -68,7 +83,7 @@ const Nav = ({ onClick }) => {
             <span
               onClick={onClick}
               className={
-                'border-4 border-red-600 w-[90px] h-[90px] text-center p-3 flex flex-row flex-wrap items-center justify-center z-10'
+                'border-4 border-red-600 w-[80px] h-[80px] text-center p-3 flex flex-row flex-wrap items-center justify-center z-10'
               }>
               {format.length > 2
                 ? format.map((item) => <span className={'m-1'}>{item}</span>)
@@ -81,7 +96,41 @@ const Nav = ({ onClick }) => {
         </div>
       </div>
 
+      <div className={'my-6 flex flex-row items-center justify-between w-full'}>
+        {fonts.map((item) => (
+          <div className={'flex flex-col row items-center justify-between'}>
+            <span className={'text-black'}>타원</span>
+            <span
+              onClick={onClick}
+              style={{ fontFamily: item }}
+              className={
+                'border-4 font-bold border-red-600 rounded-[40px/100px] text-center p-2 flex flex-col z-10 text-[red] text-2xl'
+              }>
+              {format.length > 2
+                ? format.map((item) => (
+                    <span style={{ fontFamily: item }}>{item}</span>
+                  ))
+                : defaultName.map((item) => <span>{item}</span>)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className={'mb-6'}>Sign</div>
+      <button className={'border-[red] border-2'} onClick={onClick}>
+        <SignatureCanvas
+          canvasProps={{
+            id: 'signCanvas',
+            className: 'signature-canvas',
+            width: 300,
+            height: 150,
+          }}
+          ref={canvasSign}
+        />
+      </button>
+      <div className={'my-6'}>Input Text Area</div>
       <DragaInputText />
+      <div className={'my-6'}>Check Box</div>
       <DragaCheckBox />
     </div>
   );

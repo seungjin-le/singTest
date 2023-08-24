@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
-const ImageTest = ({ children, stamp, setStamp }) => {
+const Stamp = ({ stamp, setStamp }) => {
   const [size, setSize] = useState({ x: 200, y: 200 });
   const [boxPos, setBoxPos] = useState({ x: 100, y: 100 });
   const [active, setActive] = useState(false);
@@ -38,10 +38,8 @@ const ImageTest = ({ children, stamp, setStamp }) => {
   const deleteHandler = (mouseDownEvent) => {
     setStamp('');
   };
-
   return (
-    <div className={'w-[600px] h-[600px] bg-sky-100 mt-4'}>
-      <div className={'text-center mt-1'}>계약서</div>
+    <Fragment>
       {stamp && (
         <div
           id="container"
@@ -57,7 +55,7 @@ const ImageTest = ({ children, stamp, setStamp }) => {
           onMouseOver={() => setActive(true)}
           onMouseOut={() => setActive(false)}
           className={
-            'relative min-w-[100px] min-h-[100px] cursor-pointer hover:border-amber-800 hover:border-2'
+            'absolute min-w-[100px] min-h-[100px] cursor-pointer hover:border-amber-800 hover:border-2 z-5'
           }>
           {active && (
             <Fragment>
@@ -66,7 +64,7 @@ const ImageTest = ({ children, stamp, setStamp }) => {
                 type="button"
                 onMouseDown={handler}
                 className={
-                  'absolute bottom-0 right-0 translate-x-p50 translate-y-p50 w-[12px] h-[12px] bg-red-600 rounded-full z-10'
+                  'absolute bottom-0 right-0 translate-x-p50 translate-y-p50 w-[12px] h-[12px] bg-red-600 rounded-full'
                 }
               />
 
@@ -91,8 +89,8 @@ const ImageTest = ({ children, stamp, setStamp }) => {
           )}
         </div>
       )}
-    </div>
+    </Fragment>
   );
 };
 
-export default ImageTest;
+export default Stamp;
