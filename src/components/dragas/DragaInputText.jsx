@@ -1,29 +1,7 @@
-import React, { Fragment, memo, useEffect, useRef, useState } from 'react';
+import React, { Fragment, memo, useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import PositionLine from './PositionLine';
 import ToolTip from './ToolTip';
-
-const fontSizes = [
-  {
-    label: '10px',
-    value: '10px',
-  },
-  { label: '11px', value: '11px' },
-  { label: '12px', value: '12px' },
-  { label: '13px', value: '13px' },
-  { label: '14px', value: '14px' },
-  { label: '15px', value: '15px' },
-  { label: '16px', value: '16px' },
-  { label: '17px', value: '17px' },
-  { label: '18px', value: '18px' },
-  { label: '19px', value: '19px' },
-  { label: '20px', value: '20px' },
-  { label: '21px', value: '21px' },
-  { label: '22px', value: '22px' },
-  { label: '23px', value: '23px' },
-  { label: '24px', value: '24px' },
-  { label: '25px', value: '25px' },
-];
 
 const DragaInputText = ({
   style,
@@ -36,7 +14,6 @@ const DragaInputText = ({
   const ref = useRef(null);
   const [size, setSize] = useState({ x: 200, y: 50 });
   const [mouseOver, setMouseOver] = useState(false);
-  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
 
   const [{ isDragging }, drag] = useDrag({
     type: 'TEXTAREA',
@@ -99,12 +76,6 @@ const DragaInputText = ({
     const onBoxMove = (mouseMoveEvent) => {
       const deltaX = mouseMoveEvent.pageX - startPosition.x;
       const deltaY = mouseMoveEvent.pageY - startPosition.y;
-
-      setDragStartPos((currentStyle) => ({
-        ...currentStyle,
-        left: currentStyle.left + deltaX,
-        top: currentStyle.top + deltaY,
-      }));
     };
 
     const onMouseUp = () => {
@@ -148,7 +119,7 @@ const DragaInputText = ({
           />
           {mouseOver && (
             <Fragment>
-              <ToolTip item={item} onChange={onChange} options={fontSizes} />
+              <ToolTip item={item} onChange={onChange} />
               <span
                 className={
                   'absolute w-2 h-2 bg-[red] top-full translate-x-m30 translate-y-m30 rounded-full cursor-pointer z-10'

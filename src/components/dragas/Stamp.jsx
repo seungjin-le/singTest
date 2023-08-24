@@ -55,7 +55,7 @@ const Stamp = ({ stamp, setStamp }) => {
           onMouseOver={() => setActive(true)}
           onMouseOut={() => setActive(false)}
           className={
-            'absolute min-w-[100px] min-h-[100px] cursor-pointer hover:border-amber-800 hover:border-2 z-5'
+            'absolute min-w-[50px] min-h-[50px] cursor-pointer hover:border-amber-800 hover:border-2 z-5'
           }>
           {active && (
             <Fragment>

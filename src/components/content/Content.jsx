@@ -4,89 +4,50 @@ import DragaInputText from '../dragas/DragaInputText';
 import DragaCheckBox from '../dragas/DragaCheckBox';
 import PdfView from '../../container/pdf/PdfView';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
+import DragLayer from '../../container/layout/DragLayout';
 
 const Content = ({ stamp, onClick, setStamp }) => {
   const dropRef = useRef(null);
   const [droppedItems, setDroppedItems] = useState([]);
   const [scale, setScale] = useState(1);
-  const handleOnClickDelete = useCallback(
-    (id) => {
-      const newItems = droppedItems;
-      setDroppedItems(
-        newItems
-          .filter((item) => item.id !== id)
-          ?.map((item, index) => {
-            return { ...item, id: `${item.type}-${index}` };
-          })
-      );
-    },
-    [droppedItems]
-  );
+  const handleOnClickDelete = useCallback((id) => {
+    setDroppedItems((prevItems) =>
+      prevItems
+        .filter((item) => item.id !== id)
+        .map((item, index) => ({ ...item, id: `${item.type}-${index}` }))
+    );
+  }, []);
+
   const handleOnChangeTooltip = useCallback(
     ({ target: { value } }, id, type) => {
-      if (type === 'fontSize') {
-        setDroppedItems((prev) => {
-          return prev.map((item) =>
+      const fontSetPropsMap = {
+        fontSize: 'fontSize',
+        textSort: 'textAlign',
+        textColor: 'color',
+        textWeight: 'fontWeight',
+      };
+
+      if (fontSetPropsMap[type]) {
+        setDroppedItems((prev) =>
+          prev.map((item) =>
             item.id === id
               ? {
                   ...item,
                   fontSet: {
                     ...item.fontSet,
-                    fontSize: value,
+                    [fontSetPropsMap[type]]: value,
                   },
                 }
               : item
-          );
-        });
-      } else if (type === 'textSort') {
-        setDroppedItems((prev) => {
-          return prev.map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  fontSet: {
-                    ...item.fontSet,
-                    textAlign: value,
-                  },
-                }
-              : item
-          );
-        });
-      } else if (type === 'textColor') {
-        setDroppedItems((prev) => {
-          return prev.map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  fontSet: {
-                    ...item.fontSet,
-                    color: value,
-                  },
-                }
-              : item
-          );
-        });
-      } else if (type === 'textWeight') {
-        setDroppedItems((prev) => {
-          return prev.map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  fontSet: {
-                    ...item.fontSet,
-                    fontWeight: value,
-                  },
-                }
-              : item
-          );
-        });
+          )
+        );
       }
     },
     [droppedItems]
   );
   const [collect, drop] = useDrop(
     {
-      accept: ['TEXTAREA', 'CHECKBOX'],
+      accept: ['TEXTAREA', 'CHECKBOX', 'DragaInputText'],
       drop: (item, monitor) => {
         const clientOffset = monitor.getClientOffset();
 
@@ -135,9 +96,6 @@ const Content = ({ stamp, onClick, setStamp }) => {
     drop(node);
     dropRef.current = node;
   };
-  useEffect(() => {
-    console.log(droppedItems);
-  }, [droppedItems]);
 
   return (
     <div

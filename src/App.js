@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import domtoimage from 'dom-to-image';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import GlobalStyled from './styles/GlobalStyled';
 
 function App() {
   const [stamp, setStamp] = useState('');
@@ -23,7 +22,6 @@ function App() {
   };
   return (
     <DndProvider backend={HTML5Backend}>
-      <GlobalStyled />
       <div className={'w-full h-full flex flex-row'}>
         <Nav onClick={onDownloadBtn} />
 
