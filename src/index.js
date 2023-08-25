@@ -3,12 +3,13 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/tailwind.css';
 import GlobalStyled from './styles/GlobalStyled';
+import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  <React.StrictMode>
+  <BrowserRouter>
     <GlobalStyled />
     <App />
-  </React.StrictMode>
+  </BrowserRouter>
 );

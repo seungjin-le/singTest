@@ -9,7 +9,7 @@ function App() {
   const [stamp, setStamp] = useState('');
   const onDownloadBtn = ({ target }) => {
     domtoimage.toBlob(target).then((blob) => {
-      // saveAs(blob, 'card.png');
+      //saveAs(blob, 'card.png');
       setStamp(window.URL.createObjectURL(blob));
       const canvas = document.getElementById('signCanvas');
       const ctx = canvas.getContext('2d');

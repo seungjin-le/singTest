@@ -1,9 +1,9 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
-
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { saveAs } from 'file-saver';
 import { Document, Page, pdfjs } from 'react-pdf';
 import styled from 'styled-components';
-import PdfScaleSlider from '../../components/toolTips/PdfScaleSlider';
 import Stamp from '../../components/dragas/Stamp';
+import domtoimage from 'dom-to-image';
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
   import.meta.url
@@ -11,8 +11,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 const PdfView = ({ children, stamp, setStamp, combinedRef }) => {
   const [numPages, setNumPages] = useState([]);
-
   const [file, setFile] = useState({});
+  const pagesRefs = useRef(null);
   const onDocumentLoaded = ({ numPages }) => {
     const pages = new Array(numPages).fill(0);
     setNumPages(pages);
@@ -24,20 +24,39 @@ const PdfView = ({ children, stamp, setStamp, combinedRef }) => {
     },
     [file]
   );
+  const onSave = () => {
+    if (!pagesRefs.current) return;
+    domtoimage
+      .toBlob(pagesRefs.current)
+      .then((blob) => {
+        console.log(blob);
+        saveAs(blob, 'card.png');
+      })
+      .catch(function (error) {
+        console.error('oops, something went wrong!', error);
+      });
+  };
 
   return (
-    <div className={'w-full h-full z-0 relative'} ref={combinedRef}>
-      <input type="file" onChange={onChange} />
+    <div
+      className={`w-full z-0 relative h-auto min-h-[100vh]`}
+      ref={combinedRef}>
+      <div>
+        <input type="file" onChange={onChange} />
+        <button onClick={() => onSave()}>Save</button>
+      </div>
       <Stamp stamp={stamp} setStamp={setStamp} />
       {children}
-      <CustomPdfView
-        file={file || '/pdfs/계약서예시.pdf'}
-        onLoadSuccess={onDocumentLoaded}
-        className={''}>
-        {numPages.map((item, index) => (
-          <Page pageNumber={index} size={'A4'} key={index} />
-        ))}
-      </CustomPdfView>
+      <span ref={pagesRefs}>
+        <CustomPdfView
+          file={file || '/pdfs/계약서예시.pdf'}
+          onLoadSuccess={onDocumentLoaded}
+          className={''}>
+          {numPages.map((item, index) => (
+            <Page pageNumber={index} size={'A4'} key={index} />
+          ))}
+        </CustomPdfView>
+      </span>
     </div>
   );
 };
@@ -45,7 +64,7 @@ const PdfView = ({ children, stamp, setStamp, combinedRef }) => {
 export default memo(PdfView);
 
 const CustomPdfView = styled(Document)`
-  & > .react-pdf__Page {
+  & .react-pdf__Page {
     display: flex;
     flex-direction: column;
     align-items: center;

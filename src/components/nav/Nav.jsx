@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { TextField } from '@mui/material';
-import DragaInputText from '../dragas/DragaInputText';
-import DragaCheckBox from '../dragas/DragaCheckBox';
+import DragaInputText from '../dragas/NavDragaInputText';
+import NavDragaCheckBox from '../dragas/NavDragaCheckBox';
 import SignatureCanvas from 'react-signature-canvas';
 
 const fonts = [
@@ -15,7 +15,7 @@ const fonts = [
 const defaultName = ['홍', '길', '동'];
 
 const StampShape = ({ shape, className, format, onClick }) => (
-  <div className="flex flex-col">
+  <div className="flex flex-col ">
     <span className="text-black">{shape}</span>
     <span onClick={onClick} className={className}>
       {format.map((item, idx) => (
@@ -50,7 +50,7 @@ const Nav = ({ onClick }) => {
   };
 
   return (
-    <div className="w-full h-full max-w-[400px] flex flex-col items-center justify-start p-8 bg-sky-100">
+    <div className="w-full h-full max-w-[400px] flex flex-col items-center justify-start p-8 bg-sky-100 overflow-scroll">
       <div className="w-full flex flex-col items-center justify-center">
         <div className="text-2xl mb-4">모양</div>
         <TextField
@@ -109,7 +109,7 @@ const Nav = ({ onClick }) => {
       <div className="my-6">Input Text Area</div>
       <DragaInputText />
       <div className="my-6">Check Box</div>
-      <DragaCheckBox />
+      <NavDragaCheckBox />
     </div>
   );
 };

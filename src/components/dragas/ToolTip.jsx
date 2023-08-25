@@ -28,8 +28,9 @@ const ToolTip = ({ item, onChange }) => {
   return (
     <div
       className={
-        'bg-[gray] w-[250px] absolute top-0 left-1/2 translate-x-m50 -translate-y-[110%] z-5 border-2 border-red-600 rounded-md'
-      }>
+        'bg-[gray] w-[250px] absolute top-0 left-1/2 translate-x-m50 translate-y-m100 z-5 border-2 border-red-600 rounded-md'
+      }
+      onMouseDown={(e) => e.stopPropagation()}>
       <div className={'flex flex-row justify-start items-center'}>
         <div className={'w-auto p-3 whitespace-nowrap'}>폰트 크기</div>
         <div className={'w-full flex flex-row justify-center items-center '}>
