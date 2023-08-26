@@ -3,10 +3,7 @@ import TextAreaWeight from '../toolTips/TextAreaWeight';
 import ColorPicker from '../toolTips/ColorPicker';
 
 const fontSizes = [
-  {
-    label: '10px',
-    value: '10px',
-  },
+  { label: '10px', value: '10px' },
   { label: '11px', value: '11px' },
   { label: '12px', value: '12px' },
   { label: '13px', value: '13px' },
@@ -38,7 +35,9 @@ const ToolTip = ({ item, onChange }) => {
             onChange={(e) => onChange(e, item?.id, 'fontSize')}
             value={item?.fontSet?.fontSize || '14px'}>
             {fontSizes.map((item) => (
-              <option value={item.value}>{item.label}</option>
+              <option value={item.value} key={item.label}>
+                {item.label}
+              </option>
             ))}
           </select>
         </div>

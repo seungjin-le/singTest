@@ -1,12 +1,14 @@
 import React, { Fragment, useRef, useState } from 'react';
-import ToolTip from './ToolTip';
+
 import Draggable from 'react-draggable';
 import styled from 'styled-components';
+import PositionLine from './PositionLine';
+import DragReSizing from './DragReSizing';
 
 const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [checked, setChecked] = useState('');
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ x: 25, y: 25 });
   const [Opacity, setOpacity] = useState(false);
@@ -31,9 +33,13 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
     });
   };
   const handlerReSizing = (mouseDownEvent) => {
+    mouseDownEvent.stopPropagation(); // 추가: 상위 요소로의 이벤트 전파를 중지합니다.
+
     const startSize = size;
     const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
     const onMouseMove = (mouseMoveEvent) => {
+      mouseMoveEvent.preventDefault();
+
       const deltaX = mouseMoveEvent.pageX - startPosition.x;
       const deltaY = mouseMoveEvent.pageY - startPosition.y;
 
@@ -42,8 +48,8 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
       const newSize = startSize.x + directionX * maxDelta;
 
       setSize({
-        x: Math.max(newSize, 25), // Ensure X-axis width is at least 25px
-        y: Math.max(newSize, 25), // Y-axis is still determined by newSize
+        x: Math.max(newSize, 25),
+        y: Math.max(newSize, 25),
       });
     };
     const onMouseUp = () => {
@@ -55,56 +61,49 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
   };
 
   return (
-    <Draggable
-      nodeRef={nodeRef}
-      onDrag={(e, data) => trackPos(data)}
-      onStart={handleStart}
-      onStop={handleEnd}
-      bounds="parent"
-      defaultClassName={'z-10'}
-      style={{
-        width: size.x,
-        height: size.y,
-      }}>
-      <div
-        ref={nodeRef}
-        className="box"
-        style={{
-          opacity: Opacity ? '0.6' : '1',
-          ...style,
-        }}
-        onMouseOver={() => setMouseOver(true)}
-        onMouseOut={() => setMouseOver(false)}>
-        <CustomCheckbox
-          type="checkbox"
-          className={'min-h-[25px] min-w-[25px]'}
+    <Fragment>
+      <Draggable
+        nodeRef={nodeRef}
+        onDrag={(e, data) => trackPos(data)}
+        onStart={handleStart}
+        onStop={handleEnd}
+        bounds="parent"
+        defaultClassName={'z-10'}>
+        <div
+          ref={nodeRef}
+          className="box bg-[red]"
           style={{
+            opacity: Opacity ? '0.6' : '1',
+            ...style,
             width: size.x,
             height: size.y,
           }}
-        />
-        {mouseOver && (
-          <Fragment>
-            <span
-              className={
-                'absolute w-3 h-3 bg-[red] top-full -translate-x-[80%] -translate-y-[120%] rounded-full cursor-pointer z-20'
-              }
-              onMouseDown={handlerReSizing}
+          onMouseOver={() => setMouseOver(true)}
+          onMouseOut={() => setMouseOver(false)}>
+          <CustomCheckbox
+            type="checkbox"
+            className={'min-h-[25px] min-w-[25px]'}
+            style={{
+              width: size.x,
+              height: size.y,
+            }}
+          />
+          {mouseOver && (
+            <DragReSizing
+              reSizing={handlerReSizing}
+              onDelete={onDelete}
+              item={item}
             />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(item?.id);
-              }}
-              className={
-                'absolute left-full top-0 px-2 bg-red-400 rounded-full flex items-center justify-center translate-x-m50 translate-y-m50 z-20'
-              }>
-              x
-            </button>
-          </Fragment>
-        )}
-      </div>
-    </Draggable>
+          )}
+        </div>
+      </Draggable>
+      <PositionLine
+        item={item}
+        disable={mouseOver}
+        size={size}
+        position={position}
+      />
+    </Fragment>
   );
 };
 

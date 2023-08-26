@@ -1,10 +1,7 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
-import DragaInputText from '../dragas/NavDragaInputText';
-import NavDragaCheckBox from '../dragas/NavDragaCheckBox';
 import PdfView from '../../container/pdf/PdfView';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
-import DragLayer from '../../container/layout/DragLayout';
 import DragTextArea from '../dragas/DragTextArea';
 import DragCheckBox from '../dragas/DragCheckBox';
 
@@ -15,13 +12,9 @@ const Content = ({ stamp, onClick, setStamp }) => {
 
   const handleOnClickDelete = useCallback(
     (id) => {
-      console.log(droppedItems, id);
       setDroppedItems((prevItems) =>
         prevItems
-          .filter((item) => {
-            console.log(item.id !== id, item.id, id);
-            return item.id !== id;
-          })
+          .filter((item) => item.id !== id)
           .map((item, index) => ({ ...item, id: `${item.type}-${index}` }))
       );
     },
@@ -55,7 +48,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
     },
     [droppedItems]
   );
-  const [collect, drop] = useDrop(
+  const [, drop] = useDrop(
     {
       accept: ['TEXTAREA', 'CHECKBOX', 'DragaInputText'],
       drop: (item, monitor) => {
@@ -64,7 +57,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
         const dropTargetRect = dropRef.current.getBoundingClientRect();
         const { scrollX, scrollY } = window;
         const { top, left } = dropTargetRect;
-        console.log(item.offset.width, item.offset.height);
+
         const x = clientOffset.x - left - scrollX - item.offset.width / 2;
         const y = clientOffset.y - top - scrollY - item.offset.height / 2;
         const check = droppedItems.findIndex(({ id }, index) => item.id === id);
@@ -89,19 +82,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
             },
           ]);
         }
-        // else {
-        //           setDroppedItems((prev) => {
-        //             return prev.map((item, index) =>
-        //               index === check ? { ...item, offset: { x: x, y: y } } : item
-        //             );
-        //           });
-        //         }
       },
-      collect: (monitor) => ({
-        isOver: monitor.isOver(),
-        highlighted: monitor.canDrop(),
-      }),
-      dropEffect: 'move',
     },
     [droppedItems]
   );
@@ -122,7 +103,6 @@ const Content = ({ stamp, onClick, setStamp }) => {
         style={{ transform: `scale(${scale}, ${scale})` }}>
         <PdfView stamp={stamp} setStamp={setStamp} combinedRef={combinedRef}>
           {droppedItems.map((item, index) => {
-            console.log(item);
             switch (item.type) {
               case 'textArea':
                 return (
@@ -139,20 +119,6 @@ const Content = ({ stamp, onClick, setStamp }) => {
                     setState={setDroppedItems}
                     onChange={handleOnChangeTooltip}
                   />
-                  // <DragaInputText
-                  //   key={index}
-                  //   index={index}
-                  //   style={{
-                  //     position: 'absolute',
-                  //     left: item.offset.x,
-                  //     top: item.offset.y,
-                  //     fontSize: item.fontSize,
-                  //   }}
-                  //   onDelete={handleOnClickDelete}
-                  //   item={item}
-                  //   setState={setDroppedItems}
-                  //   onChange={handleOnChangeTooltip}
-                  // />
                 );
               case 'checkBox':
                 return (
@@ -169,18 +135,6 @@ const Content = ({ stamp, onClick, setStamp }) => {
                     setState={setDroppedItems}
                     onChange={handleOnChangeTooltip}
                   />
-                  // <NavDragaCheckBox
-                  //   key={index}
-                  //   index={index}
-                  //   style={{
-                  //     position: 'absolute',
-                  //     left: item.offset.x,
-                  //     top: item.offset.y,
-                  //   }}
-                  //   onDelete={handleOnClickDelete}
-                  //   item={item}
-                  //   setState={setDroppedItems}
-                  // />
                 );
               default: {
                 return null;

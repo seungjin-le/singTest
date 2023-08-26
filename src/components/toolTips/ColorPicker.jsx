@@ -56,7 +56,6 @@ const ColorPicker = ({ onChange, item }) => {
   const [open, setOpen] = useState(false);
 
   const handlerOnChangeColor = (color) => {
-    console.log(item);
     const event = {
       target: {
         value: color.hex,

@@ -20,6 +20,7 @@ const StampShape = ({ shape, className, format, onClick }) => (
     <span onClick={onClick} className={className}>
       {format.map((item, idx) => (
         <span
+          key={idx}
           className={`${
             shape === '원' || shape === '사각형' ? 'block w-[50%]' : ''
           }`}>
@@ -44,10 +45,6 @@ const Nav = ({ onClick }) => {
   const canvasSign = useRef();
 
   const onChange = ({ target: { value } }) => setName(value);
-
-  const handlerShape = () => {
-    console.log('shape');
-  };
 
   return (
     <div className="w-full h-full max-w-[400px] flex flex-col items-center justify-start p-8 bg-sky-100 overflow-scroll">
@@ -86,6 +83,7 @@ const Nav = ({ onClick }) => {
       <div className="my-6 flex flex-row items-center justify-between w-full">
         {fonts.map((font) => (
           <StampShape
+            key={font}
             className={`border-4 font-bold border-red-600 rounded-[40px/100px] text-center p-2 flex flex-col z-10 text-[red] text-3xl`}
             format={format.map((item) => (
               <span style={{ fontFamily: font }}>{item}</span>

@@ -2,6 +2,7 @@ import React, { Fragment, memo, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import ToolTip from './ToolTip';
 import PositionLine from './PositionLine';
+import DragReSizing from './DragReSizing';
 
 const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
   const nodeRef = useRef(null);
@@ -39,7 +40,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
       const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
       setSize({
         x: Math.max(newX, 100),
-        y: Math.max(newY, 45),
+        y: Math.max(newY, 25),
       });
     };
 
@@ -60,7 +61,6 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
     document.body.addEventListener('mousemove', onMouseMove);
     document.body.addEventListener('mouseup', onMouseUp, { once: true });
   };
-  console.log(item?.offset?.defaultPosition?.x, item?.offset?.position.x);
   return (
     <Fragment>
       <Draggable
@@ -69,82 +69,55 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
         onStart={handleStart}
         onStop={handleEnd}
         bounds="parent"
-        defaultClassName={'z-10'}
-        style={{
-          width: size.x,
-          height: size.y,
-        }}>
+        defaultClassName={'z-10'}>
         <div
           ref={nodeRef}
-          className="box"
+          className="box box-border h-auto p-[1px] rounded-[5px] flex items-center justify-center"
           style={{
             opacity: Opacity ? '0.6' : '1',
             ...style,
+            width: size.x,
+            height: size.y,
           }}
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}>
           <textarea
-            className={'resize-none p-2 rounded-[5px] w-60px h-full z-20'}
+            className={
+              'resize-none p-2 rounded-[5px] w-60px h-full z-20 box-border whitespace-nowrap overflow-hidden'
+            }
             value={inputValue || ''}
             onChange={(e) => {
               setInputValue(e.target.value);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
             }}
             style={{
               fontSize: item?.fontSet?.fontSize,
               textAlign: item?.fontSet?.textAlign,
               color: item?.fontSet?.color,
               fontWeight: item?.fontSet?.fontWeight,
-              width: size.x,
-              height: size.y,
+              width: size.x - 2,
+              height: size.y - 2,
             }}
           />
-
           {mouseOver && (
             <Fragment>
-              <ToolTip item={item} onChange={onChange} />
-              <span
-                className={
-                  'absolute w-3 h-3 bg-[red] top-full -translate-x-[80%] -translate-y-[120%] rounded-full cursor-pointer z-20'
-                }
-                onMouseDown={handlerReSizing}
+              <DragReSizing
+                reSizing={handlerReSizing}
+                onDelete={onDelete}
+                item={item}
               />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(item?.id);
-                }}
-                className={
-                  'absolute left-full top-0 px-2 bg-red-400 rounded-full flex items-center justify-center translate-x-m50 translate-y-m50 z-20'
-                }>
-                x
-              </button>
+              <ToolTip item={item} onChange={onChange} />
             </Fragment>
           )}
         </div>
       </Draggable>
-      <span
-        style={{
-          top: item?.offset?.defaultPosition?.y + position.y,
-        }}
-        className={`absolute border-[1px] border-[red] w-[100vw] h-0 left-0 border-dotted z-5`}
-      />
-      <span
-        style={{
-          top: item?.offset?.defaultPosition?.y + position.y + size?.y,
-        }}
-        className={`absolute border-[1px] border-[red] w-[100vw] h-0 left-0 border-dotted z-5`}
-      />
-      <span
-        style={{
-          left: item?.offset?.defaultPosition?.x + position.x,
-        }}
-        className={`absolute border-[1px] border-[red] w-0 h-[100vh] left-0 border-dotted z-5`}
-      />
-      <span
-        style={{
-          left: item?.offset?.defaultPosition?.x + position.x + size?.x,
-        }}
-        className={`absolute border-[1px] border-[red] w-0 h-[100vh] left-0 border-dotted z-5`}
+      <PositionLine
+        item={item}
+        disable={mouseOver}
+        size={size}
+        position={position}
       />
     </Fragment>
   );

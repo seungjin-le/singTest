@@ -10,11 +10,6 @@ const NavDragaInputText = ({ index }) => {
     type: 'TEXTAREA',
     item: (monitor, item) => {
       const rect = ref.current.getBoundingClientRect();
-      console.log(monitor.getClientOffset().x, rect.left);
-      console.log(
-        monitor.getClientOffset().x - rect.left,
-        monitor.getClientOffset().y - rect.top
-      );
       return {
         id: `textArea-${index}`,
         type: 'textArea',
