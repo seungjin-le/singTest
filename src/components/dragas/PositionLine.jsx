@@ -22,14 +22,14 @@ const PositionLine = ({ item, disable, size, position }) => {
             style={{
               left: item?.offset?.defaultPosition?.x + position.x - 2.5,
             }}
-            className={`leftLine absolute border-[1px] border-[red] w-0 h-[100vh] left-0 border-dotted z-5`}
+            className={`leftLine absolute border-[1px] border-[red] w-0 h-[100vh] left-0 top-0 border-dotted z-5`}
           />
           <span
             style={{
               left:
                 item?.offset?.defaultPosition?.x + position.x + size?.x + 0.5,
             }}
-            className={`rightLine absolute border-[1px] border-[red] w-0 h-[100vh] left-0 border-dotted z-5`}
+            className={`rightLine absolute border-[1px] border-[red] w-0 h-[100vh] left-0 top-0 border-dotted z-5`}
           />
         </Fragment>
       ) : (

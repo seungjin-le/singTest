@@ -113,6 +113,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
           {droppedItems.map((item, index) => {
             const defaultPosition = item.offset.defaultPosition;
             const position = item.offset.position;
+            if (item.page !== currentPage) return null;
             switch (item.type) {
               case 'textArea':
                 return (
@@ -122,7 +123,6 @@ const Content = ({ stamp, onClick, setStamp }) => {
                       position: 'absolute',
                       left: defaultPosition.x,
                       top: defaultPosition.y,
-                      transform: 'translate(0px, 0px) !important',
                     }}
                     onDelete={handleOnClickDelete}
                     item={item}

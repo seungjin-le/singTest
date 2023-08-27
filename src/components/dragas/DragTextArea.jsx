@@ -1,4 +1,11 @@
-import React, { Fragment, memo, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Draggable from 'react-draggable';
 import ToolTip from './ToolTip';
 import PositionLine from './PositionLine';
@@ -8,18 +15,22 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ x: 200, y: 50 });
-  const [Opacity, setOpacity] = useState(false);
+  const [position, setPosition] = useState(item.offset.position);
+  const [size, setSize] = useState({
+    x: item.offset.width || 200,
+    y: item.offset.height || 50,
+  });
 
+  const [Opacity, setOpacity] = useState(false);
   const trackPos = (data) => {
     setPosition({ x: data.x, y: data.y });
   };
   const handleStart = () => {
     setOpacity(true);
   };
-  const handleEnd = () => {
+  const handleEnd = useCallback(() => {
     setOpacity(false);
+    console.log(item.offset, position, position);
     setState((prev) => {
       return prev.map((data) =>
         data.id === item.id
@@ -30,37 +41,47 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
           : data
       );
     });
-  };
-  const handlerReSizing = (mouseDownEvent) => {
-    mouseDownEvent.stopPropagation();
-    const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
+  }, [item, position, setState]);
+  const handlerReSizing = useCallback(
+    (mouseDownEvent) => {
+      mouseDownEvent.stopPropagation();
+      let changeSize = {};
+      const startPosition = {
+        x: mouseDownEvent.pageX,
+        y: mouseDownEvent.pageY,
+      };
 
-    const onMouseMove = (mouseMoveEvent) => {
-      const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
-      const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
-      setSize({
-        x: Math.max(newX, 100),
-        y: Math.max(newY, 25),
-      });
-    };
+      const onMouseMove = (mouseMoveEvent) => {
+        const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
+        const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
+        changeSize = { x: Math.max(newX, 100), y: Math.max(newY, 25) };
+        setSize(changeSize);
+      };
 
-    const onMouseUp = () => {
-      setState((prev) => {
-        return prev.map((data) =>
-          data.id === item.id
-            ? {
-                ...data,
-                offset: { ...data.offset, width: size.x, height: size.y },
-              }
-            : data
-        );
-      });
-      document.body.removeEventListener('mousemove', onMouseMove);
-    };
+      const onMouseUp = () => {
+        setState((prev) => {
+          return prev.map((data) =>
+            data.id === item.id
+              ? {
+                  ...data,
+                  offset: {
+                    ...data.offset,
+                    width: changeSize.x,
+                    height: changeSize.y,
+                  },
+                }
+              : data
+          );
+        });
+        document.body.removeEventListener('mousemove', onMouseMove);
+      };
 
-    document.body.addEventListener('mousemove', onMouseMove);
-    document.body.addEventListener('mouseup', onMouseUp, { once: true });
-  };
+      document.body.addEventListener('mousemove', onMouseMove);
+      document.body.addEventListener('mouseup', onMouseUp, { once: true });
+    },
+    [item, setState]
+  );
+
   return (
     <Fragment>
       <Draggable
@@ -69,6 +90,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
         onStart={handleStart}
         onStop={handleEnd}
         bounds="parent"
+        position={position}
         defaultClassName={'z-10'}>
         <div
           ref={nodeRef}
@@ -78,6 +100,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
             ...style,
             width: size.x,
             height: size.y,
+            transform: `translate(${position.x}px, ${position.y}px)`,
           }}
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}>
