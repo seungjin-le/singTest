@@ -32,6 +32,7 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
       );
     });
   };
+
   const handlerReSizing = (mouseDownEvent) => {
     mouseDownEvent.stopPropagation(); // 추가: 상위 요소로의 이벤트 전파를 중지합니다.
 

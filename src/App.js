@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import domtoimage from 'dom-to-image';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import NewPdfs from './container/pdf/NewPdfs';
 
 function App() {
   const [stamp, setStamp] = useState('');
@@ -25,6 +26,7 @@ function App() {
       <div className={'w-full h-full flex flex-row'}>
         <Nav onClick={onDownloadBtn} />
 
+        {/*<NewPdfs />*/}
         <Content stamp={stamp} setStamp={setStamp} onClick={onDownloadBtn} />
       </div>
     </DndProvider>

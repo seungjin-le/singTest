@@ -4,12 +4,13 @@ import PdfView from '../../container/pdf/PdfView';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
 import DragTextArea from '../dragas/DragTextArea';
 import DragCheckBox from '../dragas/DragCheckBox';
+import NewPdfs from '../../container/pdf/NewPdfs';
 
 const Content = ({ stamp, onClick, setStamp }) => {
   const dropRef = useRef(null);
   const [droppedItems, setDroppedItems] = useState([]);
   const [scale, setScale] = useState(1);
-
+  const [currentPage, setCurrentPage] = useState(1);
   const handleOnClickDelete = useCallback(
     (id) => {
       setDroppedItems((prevItems) =>
@@ -68,6 +69,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
             {
               ...item,
               id: `${item.type}-${droppedItems.length}`,
+              page: currentPage,
               offset: {
                 ...item.offset,
                 defaultPosition: { x: x, y: y },
@@ -84,7 +86,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
         }
       },
     },
-    [droppedItems]
+    [droppedItems, currentPage]
   );
   const combinedRef = (node) => {
     drop(node);
@@ -101,8 +103,16 @@ const Content = ({ stamp, onClick, setStamp }) => {
           'w-full h-full flex-col items-center justify-center overflow-y-scroll overflow-x-hidden'
         }
         style={{ transform: `scale(${scale}, ${scale})` }}>
-        <PdfView stamp={stamp} setStamp={setStamp} combinedRef={combinedRef}>
+        <NewPdfs
+          stamp={stamp}
+          setStamp={setStamp}
+          combinedRef={combinedRef}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          droppedItems={droppedItems}>
           {droppedItems.map((item, index) => {
+            const defaultPosition = item.offset.defaultPosition;
+            const position = item.offset.position;
             switch (item.type) {
               case 'textArea':
                 return (
@@ -110,8 +120,8 @@ const Content = ({ stamp, onClick, setStamp }) => {
                     key={index}
                     style={{
                       position: 'absolute',
-                      left: item.offset.defaultPosition.x,
-                      top: item.offset.defaultPosition.y,
+                      left: defaultPosition.x,
+                      top: defaultPosition.y,
                       transform: 'translate(0px, 0px) !important',
                     }}
                     onDelete={handleOnClickDelete}
@@ -126,9 +136,8 @@ const Content = ({ stamp, onClick, setStamp }) => {
                     key={index}
                     style={{
                       position: 'absolute',
-                      left: item.offset.defaultPosition.x,
-                      top: item.offset.defaultPosition.y,
-                      transform: 'translate(0px, 0px) !important',
+                      left: defaultPosition.x,
+                      top: defaultPosition.y,
                     }}
                     onDelete={handleOnClickDelete}
                     item={item}
@@ -141,7 +150,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
               }
             }
           })}
-        </PdfView>
+        </NewPdfs>
       </div>
 
       <PdfScaleSlider value={scale} setValue={setScale} />
