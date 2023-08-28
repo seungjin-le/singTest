@@ -1,39 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { TextField } from '@mui/material';
-import DragaInputText from '../dragas/NavDragaInputText';
-import NavDragaCheckBox from '../dragas/NavDragaCheckBox';
+import DragaInputText from './NavDragaInputText';
+import NavDragaCheckBox from './NavDragaCheckBox';
 import SignatureCanvas from 'react-signature-canvas';
 import StampTabs from '../tabs/StampTabs';
-
-const fonts = [
-  'JSArirang',
-  'SUITThin',
-  'IceSotongRg',
-  'kdg_Medium',
-  'Somi',
-  'HakgyoansimButpenB',
-];
-const defaultName = ['홍', '길', '동'];
-
-const StampShape = ({ shape, className, format, onClick }) => (
-  <div className="flex flex-col ">
-    <span className="text-black">{shape}</span>
-    <span onClick={onClick} className={className}>
-      {format.map((item, idx) => (
-        <span
-          key={idx}
-          className={`${
-            shape === '원' || shape === '사각형' ? 'block w-[50%]' : ''
-          }`}>
-          {item}
-        </span>
-      ))}
-      {(shape === '원' || shape === '사각형') && (
-        <span className={'block w-[50%]'}>인</span>
-      )}
-    </span>
-  </div>
-);
 
 const Nav = ({ onClick }) => {
   const [name, setName] = useState('');

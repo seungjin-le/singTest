@@ -1,6 +1,5 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
-import DragStamp from './DragStamp';
 
 const NavStamp = ({ style, type, value, font }) => {
   const ref = useRef(null);
@@ -21,7 +20,7 @@ const NavStamp = ({ style, type, value, font }) => {
             x: 0,
             y: 0,
           },
-          type: type,
+          shapeType: type,
           value: value,
           width: size.x,
           height: size.y,

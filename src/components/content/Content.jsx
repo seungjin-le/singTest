@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
 import DragTextArea from '../dragas/DragTextArea';
@@ -64,19 +64,37 @@ const Content = ({ onClick }) => {
         const check = droppedItems.findIndex(({ id }, index) => item.id === id);
         if (check === -1) {
           if (item.type === 'stamp') {
-            setDroppedItems((prev) => [
-              ...prev,
-              {
+            console.log(item, droppedItems);
+            setDroppedItems((prev) => {
+              const newItem = {
                 ...item,
-                id: `${item.type}-${droppedItems.length}`,
+                id: `${item.type}-${prev.length}`,
                 page: currentPage,
                 offset: {
                   ...item.offset,
                   defaultPosition: { x: x, y: y },
                   position: { x: 0, y: 0 },
                 },
-              },
-            ]);
+              };
+              const { value, shapeType, fontSet } = newItem.offset;
+
+              const updatedPrev = prev.map((data) =>
+                data.type === item.type
+                  ? {
+                      ...data,
+                      offset: {
+                        ...data.offset,
+                        fontSet: {
+                          fontFamily: fontSet.fontFamily,
+                        },
+                        shapeType: shapeType,
+                        value: value,
+                      },
+                    }
+                  : data
+              );
+              return [...updatedPrev, newItem];
+            });
           } else {
             setDroppedItems((prev) => [
               ...prev,
@@ -107,7 +125,9 @@ const Content = ({ onClick }) => {
     drop(node);
     dropRef.current = node;
   };
-
+  useEffect(() => {
+    console.log(droppedItems);
+  }, [droppedItems]);
   return (
     <div
       className={
@@ -125,7 +145,6 @@ const Content = ({ onClick }) => {
           droppedItems={droppedItems}>
           {droppedItems.map((item, index) => {
             const defaultPosition = item.offset.defaultPosition;
-            const position = item.offset.position;
             const style = {
               position: 'absolute',
               top: defaultPosition.y,

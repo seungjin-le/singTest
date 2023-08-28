@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
 import styled from 'styled-components';
-import NavStamp from '../dragas/NavStamp';
+import NavStamp from '../nav/NavStamp';
 
 const fonts = [
   'JSArirang',

@@ -1,4 +1,11 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Draggable from 'react-draggable';
 import DragReSizing from './DragReSizing';
 import PositionLine from './PositionLine';
@@ -39,45 +46,51 @@ const DragStamp = ({ style, onDelete, item, setState }) => {
       );
     });
   };
-  const handlerReSizing = (mouseDownEvent) => {
-    mouseDownEvent.stopPropagation(); // 추가: 상위 요소로의 이벤트 전파를 중지합니다.
-    let changeSize = {};
-    const startSize = size;
-    const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
-    const onMouseMove = (mouseMoveEvent) => {
-      mouseMoveEvent.preventDefault();
+  const handlerReSizing = useCallback(
+    (mouseDownEvent) => {
+      mouseDownEvent.stopPropagation();
+      let changeSize = {};
+      const startPosition = {
+        x: mouseDownEvent.pageX,
+        y: mouseDownEvent.pageY,
+      };
 
-      const deltaX = mouseMoveEvent.pageX - startPosition.x;
-      const deltaY = mouseMoveEvent.pageY - startPosition.y;
+      const onMouseMove = (mouseMoveEvent) => {
+        const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
+        const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
+        changeSize = {
+          x: Math.min(Math.max(newX, 80), 150),
+          y: Math.min(Math.max(newY, 80), 150),
+        };
+        setSize(changeSize);
+      };
 
-      const maxDelta = Math.max(Math.abs(deltaX), Math.abs(deltaY));
-      const directionX = deltaX >= 0 ? 1 : -1;
-      const newSize = startSize.x + directionX * maxDelta;
-      changeSize = { x: Math.max(newSize, 80), y: Math.max(newSize, 80) };
+      const onMouseUp = () => {
+        setState((prev) => {
+          return prev.map((data) =>
+            data.id === item.id
+              ? {
+                  ...data,
+                  offset: {
+                    ...data.offset,
+                    width: changeSize.x,
+                    height: changeSize.y,
+                  },
+                }
+              : data
+          );
+        });
+        document.body.removeEventListener('mousemove', onMouseMove);
+      };
 
-      setSize(changeSize);
-    };
-    const onMouseUp = () => {
-      setState((prev) => {
-        return prev.map((data) =>
-          data.id === item.id
-            ? {
-                ...data,
-                offset: {
-                  ...data.offset,
-                  width: changeSize.x,
-                  height: changeSize.y,
-                },
-              }
-            : data
-        );
-      });
-      document.body.removeEventListener('mousemove', onMouseMove);
-    };
-
-    document.body.addEventListener('mousemove', onMouseMove);
-    document.body.addEventListener('mouseup', onMouseUp, { once: true });
-  };
+      document.body.addEventListener('mousemove', onMouseMove);
+      document.body.addEventListener('mouseup', onMouseUp, { once: true });
+    },
+    [item, setState]
+  );
+  useEffect(() => {
+    setInputValue(item.offset.value || []);
+  }, [item]);
 
   return (
     <Fragment>
@@ -101,29 +114,31 @@ const DragStamp = ({ style, onDelete, item, setState }) => {
           className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer`}>
           <span
             className={`${style} border-4 font-bold border-red-600 flex text-center p-0  z-10 text-[red] text-3xl flex-1 ${stampShape(
-              item?.offset.type
+              item?.offset.shapeType
             )}`}>
             {inputValue?.map((name) => (
               <span
                 className={`${
-                  item?.offset.type !== 0 && 'block w-[25px] h-[25px]'
+                  item?.offset.shapeType !== 0 && 'block w-[25px] h-[25px]'
                 }`}>
                 {name}
               </span>
             ))}
-            {item?.offset.type !== 0 && (
+            {item?.offset.shapeType !== 0 && (
               <span className={`block w-[25px] h-[25px]`}>인</span>
             )}
           </span>
+          {mouseOver && (
+            <DragReSizing
+              reSizing={handlerReSizing}
+              onDelete={onDelete}
+              item={item}
+            />
+          )}
         </div>
       </Draggable>
       {mouseOver && (
         <Fragment>
-          <DragReSizing
-            reSizing={handlerReSizing}
-            onDelete={onDelete}
-            item={item}
-          />
           <PositionLine
             item={item}
             disable={mouseOver}
@@ -136,14 +151,4 @@ const DragStamp = ({ style, onDelete, item, setState }) => {
   );
 };
 
-export default DragStamp;
-
-//  // className={
-//           //   'absolute min-w-[50px] min-h-[50px] cursor-pointer hover:border-amber-800 hover:border-2 z-5'
-//           // }>
-//           // {inputValue?.map((name) => (
-//           //   <span
-//           //     className={`${style} border-4 font-bold border-red-600 flex text-center p-0  z-10 text-[red] text-3xl flex-1`}>
-//           //     {name}
-//           //   </span>
-//           // ))}
+export default memo(DragStamp);
