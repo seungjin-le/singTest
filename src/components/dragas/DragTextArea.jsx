@@ -14,7 +14,7 @@ import DragReSizing from './DragReSizing';
 const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(item.value);
   const [position, setPosition] = useState(item.offset.position);
   const [size, setSize] = useState({
     x: item.offset.width || 200,
@@ -25,12 +25,9 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
   const trackPos = (data) => {
     setPosition({ x: data.x, y: data.y });
   };
-  const handleStart = () => {
-    setOpacity(true);
-  };
+
   const handleEnd = useCallback(() => {
     setOpacity(false);
-    console.log(item.offset, position, position);
     setState((prev) => {
       return prev.map((data) =>
         data.id === item.id
@@ -42,6 +39,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
       );
     });
   }, [item, position, setState]);
+
   const handlerReSizing = useCallback(
     (mouseDownEvent) => {
       mouseDownEvent.stopPropagation();
@@ -82,14 +80,29 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
     [item, setState]
   );
 
+  const handlerTextAreaOnBlur = useCallback(
+    ({ target: { value } }) => {
+      setState((prev) => {
+        return prev.map((data) =>
+          data.id === item.id
+            ? {
+                ...data,
+                value: inputValue,
+              }
+            : data
+        );
+      });
+    },
+    [item, inputValue]
+  );
+
   return (
     <Fragment>
       <Draggable
         nodeRef={nodeRef}
         onDrag={(e, data) => trackPos(data)}
-        onStart={handleStart}
+        onStart={() => setOpacity(true)}
         onStop={handleEnd}
-        bounds="parent"
         position={position}
         defaultClassName={'z-10'}>
         <div
@@ -100,7 +113,6 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
             ...style,
             width: size.x,
             height: size.y,
-            transform: `translate(${position.x}px, ${position.y}px)`,
           }}
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}>
@@ -108,7 +120,8 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
             className={
               'resize-none p-2 rounded-[5px] w-60px h-full z-20 box-border whitespace-nowrap overflow-hidden'
             }
-            value={inputValue || ''}
+            onBlur={handlerTextAreaOnBlur}
+            value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
             }}

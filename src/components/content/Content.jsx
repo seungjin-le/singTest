@@ -1,12 +1,12 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
-import PdfView from '../../container/pdf/PdfView';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
 import DragTextArea from '../dragas/DragTextArea';
 import DragCheckBox from '../dragas/DragCheckBox';
-import NewPdfs from '../../container/pdf/NewPdfs';
+import NewPdfs from '../../container/pdf/PdfView';
+import DragStamp from '../dragas/DragStamp';
 
-const Content = ({ stamp, onClick, setStamp }) => {
+const Content = ({ onClick }) => {
   const dropRef = useRef(null);
   const [droppedItems, setDroppedItems] = useState([]);
   const [scale, setScale] = useState(1);
@@ -51,7 +51,7 @@ const Content = ({ stamp, onClick, setStamp }) => {
   );
   const [, drop] = useDrop(
     {
-      accept: ['TEXTAREA', 'CHECKBOX', 'DragaInputText'],
+      accept: ['TEXTAREA', 'CHECKBOX', 'DIV'],
       drop: (item, monitor) => {
         const clientOffset = monitor.getClientOffset();
 
@@ -62,27 +62,42 @@ const Content = ({ stamp, onClick, setStamp }) => {
         const x = clientOffset.x - left - scrollX - item.offset.width / 2;
         const y = clientOffset.y - top - scrollY - item.offset.height / 2;
         const check = droppedItems.findIndex(({ id }, index) => item.id === id);
-
         if (check === -1) {
-          setDroppedItems((prev) => [
-            ...prev,
-            {
-              ...item,
-              id: `${item.type}-${droppedItems.length}`,
-              page: currentPage,
-              offset: {
-                ...item.offset,
-                defaultPosition: { x: x, y: y },
-                position: { x: 0, y: 0 },
+          if (item.type === 'stamp') {
+            setDroppedItems((prev) => [
+              ...prev,
+              {
+                ...item,
+                id: `${item.type}-${droppedItems.length}`,
+                page: currentPage,
+                offset: {
+                  ...item.offset,
+                  defaultPosition: { x: x, y: y },
+                  position: { x: 0, y: 0 },
+                },
               },
-              fontSet: {
-                fontSize: '14px',
-                textAlign: 'left',
-                color: '#000000',
-                fontWeight: '400',
+            ]);
+          } else {
+            setDroppedItems((prev) => [
+              ...prev,
+              {
+                ...item,
+                id: `${item.type}-${droppedItems.length}`,
+                page: currentPage,
+                offset: {
+                  ...item.offset,
+                  defaultPosition: { x: x, y: y },
+                  position: { x: 0, y: 0 },
+                },
+                fontSet: {
+                  fontSize: '14px',
+                  textAlign: 'left',
+                  color: '#000000',
+                  fontWeight: '400',
+                },
               },
-            },
-          ]);
+            ]);
+          }
         }
       },
     },
@@ -104,8 +119,6 @@ const Content = ({ stamp, onClick, setStamp }) => {
         }
         style={{ transform: `scale(${scale}, ${scale})` }}>
         <NewPdfs
-          stamp={stamp}
-          setStamp={setStamp}
           combinedRef={combinedRef}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -113,17 +126,18 @@ const Content = ({ stamp, onClick, setStamp }) => {
           {droppedItems.map((item, index) => {
             const defaultPosition = item.offset.defaultPosition;
             const position = item.offset.position;
-            if (item.page !== currentPage) return null;
+            const style = {
+              position: 'absolute',
+              top: defaultPosition.y,
+              left: defaultPosition.x,
+              fontFamily: item?.offset?.fontSet?.fontFamily || '',
+            };
             switch (item.type) {
               case 'textArea':
                 return (
                   <DragTextArea
                     key={index}
-                    style={{
-                      position: 'absolute',
-                      left: defaultPosition.x,
-                      top: defaultPosition.y,
-                    }}
+                    style={style}
                     onDelete={handleOnClickDelete}
                     item={item}
                     setState={setDroppedItems}
@@ -134,15 +148,20 @@ const Content = ({ stamp, onClick, setStamp }) => {
                 return (
                   <DragCheckBox
                     key={index}
-                    style={{
-                      position: 'absolute',
-                      left: defaultPosition.x,
-                      top: defaultPosition.y,
-                    }}
+                    style={style}
                     onDelete={handleOnClickDelete}
                     item={item}
                     setState={setDroppedItems}
-                    onChange={handleOnChangeTooltip}
+                  />
+                );
+              case 'stamp':
+                return (
+                  <DragStamp
+                    key={index}
+                    style={style}
+                    onDelete={handleOnClickDelete}
+                    item={item}
+                    setState={setDroppedItems}
                   />
                 );
               default: {

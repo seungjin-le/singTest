@@ -1,81 +1,143 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { saveAs } from 'file-saver';
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import styled from 'styled-components';
-import Stamp from '../../components/dragas/Stamp';
-import domtoimage from 'dom-to-image';
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url
-).toString();
 
-const PdfView = ({ children, stamp, setStamp, combinedRef }) => {
-  const [numPages, setNumPages] = useState([]);
-  const [file, setFile] = useState({});
-  const pagesRefs = useRef(null);
-  const onDocumentLoaded = ({ numPages }) => {
-    const pages = new Array(numPages).fill(0);
-    setNumPages(pages);
+import { Pagination } from '@mui/material';
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
+  const [numPages, setNumPages] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+  const [page, setPage] = useState(4);
+  const [pagesRendered, setPagesRendered] = useState(1);
+  const [components, setComponents] = useState([]);
+  const containerRef = useRef(null);
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
   };
 
-  const onChange = useCallback(
-    ({ target }) => {
-      setFile(target?.files[0]);
-    },
-    [file]
-  );
-  const onSave = () => {
-    if (!pagesRefs.current) return;
-    domtoimage
-      .toBlob(pagesRefs.current)
-      .then((blob) => {
-        console.log(blob);
-        saveAs(blob, 'card.png');
-      })
-      .catch(function (error) {
-        console.error('oops, something went wrong!', error);
-      });
+  const onDown = useCallback(() => {
+    const pdf = new jsPDF();
+    for (let i = 0; i < components.length; i++) {
+      pdf.addImage(components[i], 'JPEG', 0, 0, 210, 297);
+      if (i !== components.length - 1) pdf.addPage();
+    }
+    pdf.save('download.pdf');
+    setDownloading(false);
+    setPagesRendered(1);
+    setComponents([]);
+  }, [components, children]);
+
+  const onPageRenderSuccess = useCallback(async () => {
+    setTimeout(async () => {
+      const input = document.getElementById(
+        `pdf-container-page${pagesRendered}`
+      );
+      const canvas = await html2canvas(input);
+      const imgData = canvas.toDataURL('image/png');
+      setComponents((prev) => [...prev, imgData]);
+      if (pagesRendered !== numPages) {
+        setPagesRendered((prev) => prev + 1);
+      }
+    }, 500);
+  }, [components, pagesRendered, downloading, children]);
+
+  const downloadPdf = async () => {
+    setDownloading(true);
+    onPageRenderSuccess();
   };
+
+  const onChangePage = (event, page) => {
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    if (components.length === numPages) {
+      onDown();
+    }
+  }, [components]);
 
   return (
-    <div
-      className={`w-full z-0 relative h-auto min-h-[100vh]`}
-      ref={combinedRef}>
-      <div>
-        <input type="file" onChange={onChange} />
-        <button onClick={() => onSave()}>Save</button>
+    <PdfViewContainer
+      id="pdf-container"
+      ref={containerRef}
+      className={
+        'w-full h-auto overflow-scroll flex justify-center flex-col items-center p-4 z-0'
+      }>
+      <button onClick={downloadPdf}>Download PDF</button>
+      <div className={'h-full w-full'} ref={combinedRef}>
+        <Document
+          file="/pdfs/계약서예시.pdf"
+          className={'w-full h-full z-0'}
+          onLoadSuccess={onDocumentLoadSuccess}>
+          {downloading ? (
+            <Fragment>
+              <div
+                key={`page_${pagesRendered}`}
+                className={'mb-4 w-full h-auto flex justify-center'}>
+                <span id={`pdf-container-page${pagesRendered}`}>
+                  <Page
+                    pageNumber={pagesRendered}
+                    onLoadSuccess={onPageRenderSuccess}
+                  />
+                  {children.map(
+                    (item) => item?.props?.item.page === pagesRendered && item
+                  )}
+                </span>
+              </div>
+              <Pagination
+                count={page}
+                page={pagesRendered}
+                onChange={onChangePage}
+              />
+            </Fragment>
+          ) : (
+            <Fragment>
+              <div
+                key={`page_${currentPage}`}
+                className={'mb-4 w-full h-auto flex justify-center'}>
+                <span id={`pdf-container-page${currentPage}`}>
+                  <Page pageNumber={currentPage} />
+                  {children.map(
+                    (item) => item?.props?.item.page === currentPage && item
+                  )}
+                </span>
+              </div>
+              <Pagination
+                count={numPages}
+                page={currentPage}
+                onChange={onChangePage}
+              />
+            </Fragment>
+          )}
+        </Document>
       </div>
-      <Stamp stamp={stamp} setStamp={setStamp} />
-      {children}
-      <span ref={pagesRefs}>
-        <CustomPdfView
-          file={file || '/pdfs/계약서예시.pdf'}
-          onLoadSuccess={onDocumentLoaded}
-          className={''}>
-          {numPages.map((item, index) => (
-            <Page pageNumber={index} size={'A4'} key={index} />
-          ))}
-        </CustomPdfView>
-      </span>
-    </div>
+    </PdfViewContainer>
   );
 };
 
 export default memo(PdfView);
 
-const CustomPdfView = styled(Document)`
+const PdfViewContainer = styled.div`
+  & .react-pdf__Page__annotations.annotationLayer,
+  & .react-pdf__Page__textContent {
+    display: none;
+  }
   & .react-pdf__Page {
-    display: flex;
     flex-direction: column;
     align-items: center;
-    background: gray !important;
-    margin-bottom: 2rem;
-    padding: 2rem 0;
-    & > canvas {
-      border: 1px solid black;
-    }
-    & > div {
-      display: none;
-    }
+    justify-content: center;
+    display: inline;
+    width: auto;
   }
 `;

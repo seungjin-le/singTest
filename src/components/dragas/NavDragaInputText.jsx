@@ -1,17 +1,16 @@
 import React, { Fragment, memo, useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
 
-const NavDragaInputText = ({ index }) => {
+const NavDragaInputText = () => {
   const ref = useRef(null);
   const [size, setSize] = useState({ x: 200, y: 50 });
-  const [mouseOver, setMouseOver] = useState(false);
 
   const [, drag] = useDrag({
     type: 'TEXTAREA',
     item: (monitor, item) => {
       const rect = ref.current.getBoundingClientRect();
       return {
-        id: `textArea-${index}`,
+        id: `textArea-`,
         type: 'textArea',
         offset: {
           defaultPosition: {
@@ -22,6 +21,7 @@ const NavDragaInputText = ({ index }) => {
             x: 0,
             y: 0,
           },
+          value: '',
           width: size.x,
           height: size.y,
           fontSet: {
