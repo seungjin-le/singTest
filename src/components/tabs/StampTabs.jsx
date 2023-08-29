@@ -45,6 +45,7 @@ const StampTabs = ({ name }) => {
   const handleCanvasEnd = () => {
     setSignImage(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
   };
+
   return (
     <Box className={'w-full'}>
       <StyledTabs

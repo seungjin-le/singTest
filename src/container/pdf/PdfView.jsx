@@ -6,6 +6,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { Document, Page, pdfjs } from 'react-pdf';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
