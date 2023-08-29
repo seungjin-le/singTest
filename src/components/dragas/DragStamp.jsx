@@ -10,7 +10,7 @@ import Draggable from 'react-draggable';
 import DragReSizing from './DragReSizing';
 import PositionLine from './PositionLine';
 
-const DragStamp = ({ style, onDelete, item, setState }) => {
+const DragStamp = ({ style, onDelete, item, setState, mode }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const [Opacity, setOpacity] = useState(false);
@@ -100,6 +100,7 @@ const DragStamp = ({ style, onDelete, item, setState }) => {
         onStart={() => setOpacity(true)}
         onStop={handleEnd}
         position={position}
+        disabled={mode}
         defaultClassName={'z-10'}>
         <div
           ref={nodeRef}
@@ -112,23 +113,27 @@ const DragStamp = ({ style, onDelete, item, setState }) => {
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}
           className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer`}>
-          <span
-            className={`${style} border-4 font-bold border-red-600 flex text-center p-0  z-10 text-[red] text-3xl flex-1 ${stampShape(
-              item?.offset.shapeType
-            )}`}>
-            {inputValue?.map((name) => (
-              <span
-                className={`${
-                  item?.offset.shapeType !== 0 && 'block w-[25px] h-[25px]'
-                }`}>
-                {name}
-              </span>
-            ))}
-            {item?.offset.shapeType !== 0 && (
-              <span className={`block w-[25px] h-[25px]`}>인</span>
-            )}
-          </span>
-          {mouseOver && (
+          {item.offset.shapeType !== 3 ? (
+            <span
+              className={`${style} border-4 font-bold border-red-600 flex text-center p-0  z-10 text-[red] text-3xl flex-1 ${stampShape(
+                item?.offset.shapeType
+              )}`}>
+              {inputValue?.map((name) => (
+                <span
+                  className={`${
+                    item?.offset.shapeType !== 0 && 'block w-[25px] h-[25px]'
+                  }`}>
+                  {name}
+                </span>
+              ))}
+              {item?.offset.shapeType !== 0 && (
+                <span className={`block w-[25px] h-[25px]`}>인</span>
+              )}
+            </span>
+          ) : (
+            <img src={inputValue} alt={'sign'} className={'w-full'} />
+          )}
+          {mouseOver && !mode && (
             <DragReSizing
               reSizing={handlerReSizing}
               onDelete={onDelete}
@@ -137,7 +142,7 @@ const DragStamp = ({ style, onDelete, item, setState }) => {
           )}
         </div>
       </Draggable>
-      {mouseOver && (
+      {mouseOver && !mode && (
         <Fragment>
           <PositionLine
             item={item}

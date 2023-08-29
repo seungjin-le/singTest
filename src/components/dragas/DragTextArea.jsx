@@ -11,7 +11,7 @@ import ToolTip from './ToolTip';
 import PositionLine from './PositionLine';
 import DragReSizing from './DragReSizing';
 
-const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
+const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const [inputValue, setInputValue] = useState(item.value);
@@ -103,6 +103,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
         onDrag={(e, data) => trackPos(data)}
         onStart={() => setOpacity(true)}
         onStop={handleEnd}
+        disabled={mode}
         position={position}
         defaultClassName={'z-10'}>
         <div
@@ -120,6 +121,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
             className={
               'resize-none p-2 rounded-[5px] w-60px h-full z-20 box-border whitespace-nowrap overflow-hidden'
             }
+            disabled={mode && inputValue ? true : false}
             onBlur={handlerTextAreaOnBlur}
             value={inputValue}
             onChange={(e) => {
@@ -137,7 +139,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
               height: size.y - 2,
             }}
           />
-          {mouseOver && (
+          {mouseOver && !mode && (
             <Fragment>
               <DragReSizing
                 reSizing={handlerReSizing}
@@ -149,12 +151,15 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete }) => {
           )}
         </div>
       </Draggable>
-      <PositionLine
-        item={item}
-        disable={mouseOver}
-        size={size}
-        position={position}
-      />
+
+      {!mode && (
+        <PositionLine
+          item={item}
+          disable={mouseOver}
+          size={size}
+          position={position}
+        />
+      )}
     </Fragment>
   );
 };

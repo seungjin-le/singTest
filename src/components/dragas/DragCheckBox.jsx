@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import PositionLine from './PositionLine';
 import DragReSizing from './DragReSizing';
 
-const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
+const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const [checked, setChecked] = useState(!!item.value);
@@ -98,11 +98,11 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
         onDrag={(e, data) => trackPos(data)}
         onStart={handleStart}
         onStop={handleEnd}
+        disabled={mode}
         position={position}
         defaultClassName={'z-10'}>
         <div
           ref={nodeRef}
-          className="box bg-[red]"
           style={{
             opacity: Opacity ? '0.6' : '1',
             ...style,
@@ -121,7 +121,7 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
               height: size.y,
             }}
           />
-          {mouseOver && (
+          {mouseOver && !mode && (
             <DragReSizing
               reSizing={handlerReSizing}
               onDelete={onDelete}
@@ -130,12 +130,14 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete }) => {
           )}
         </div>
       </Draggable>
-      <PositionLine
-        item={item}
-        disable={mouseOver}
-        size={size}
-        position={position}
-      />
+      {!mode && (
+        <PositionLine
+          item={item}
+          disable={mouseOver}
+          size={size}
+          position={position}
+        />
+      )}
     </Fragment>
   );
 };

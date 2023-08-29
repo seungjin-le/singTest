@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
 
-const NavStamp = ({ style, type, value, font }) => {
+const NavSignStamp = ({ type, value }) => {
   const ref = useRef(null);
-  const [size, setSize] = useState({ x: 80, y: 80 });
+  const [size, setSize] = useState({ x: 150, y: 100 });
   const [, drag] = useDrag({
     type: 'DIV',
     item: (monitor, item) => {
@@ -24,9 +24,6 @@ const NavStamp = ({ style, type, value, font }) => {
           value: value,
           width: size.x,
           height: size.y,
-          fontSet: {
-            fontFamily: font,
-          },
         },
       };
     },
@@ -35,25 +32,11 @@ const NavStamp = ({ style, type, value, font }) => {
     drag(node);
     ref.current = node;
   };
-
   return (
-    <div
-      ref={combinedRef}
-      className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer`}>
-      <span
-        style={{
-          fontFamily: font || '',
-        }}
-        className={`${style} border-4 font-bold border-red-600 flex text-center p-0  z-10 text-[red] text-3xl flex-1`}>
-        {value?.map((name) => (
-          <span className={`${type !== 0 && 'block w-[25px] h-[25px]'}`}>
-            {name}
-          </span>
-        ))}
-        {type !== 0 && <span className={`block w-[25px] h-[25px]`}>인</span>}
-      </span>
+    <div ref={combinedRef} style={{ width: '100%', height: '200px' }}>
+      <img src={value} alt={'sign'} className={'w-full'} />
     </div>
   );
 };
 
-export default NavStamp;
+export default NavSignStamp;
