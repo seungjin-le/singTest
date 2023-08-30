@@ -3,7 +3,7 @@ import { useDrop } from 'react-dnd';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
 import DragTextArea from '../dragas/DragTextArea';
 import DragCheckBox from '../dragas/DragCheckBox';
-import NewPdfs from '../../container/pdf/PdfView';
+import PdfView from '../../container/pdf/PdfView';
 import DragStamp from '../dragas/DragStamp';
 import { Button } from '@mui/material';
 
@@ -439,7 +439,7 @@ const Content = () => {
           </Button>
           <div className={'ml-4 text-3xl'}>{mode ? 'User' : 'Admin'}</div>
         </div>
-        <NewPdfs
+        <PdfView
           combinedRef={combinedRef}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}>
@@ -491,7 +491,7 @@ const Content = () => {
               }
             }
           })}
-        </NewPdfs>
+        </PdfView>
       </div>
 
       <PdfScaleSlider value={scale} setValue={setScale} />

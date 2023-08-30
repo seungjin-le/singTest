@@ -1,9 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 
 const NavSignStamp = ({ type, value }) => {
   const ref = useRef(null);
-  const [size, setSize] = useState({ x: 150, y: 100 });
   const [, drag] = useDrag({
     type: 'DIV',
     item: (monitor, item) => {
@@ -22,8 +21,8 @@ const NavSignStamp = ({ type, value }) => {
           },
           shapeType: type,
           value: value,
-          width: size.x,
-          height: size.y,
+          width: 150,
+          height: 100,
         },
       };
     },
