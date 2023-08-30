@@ -1,12 +1,32 @@
-import React, { Fragment, memo, useRef, useState } from 'react';
-import { useDrag } from 'react-dnd';
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { DragPreviewImage, useDrag } from 'react-dnd';
+import html2canvas from 'html2canvas';
 
-const NavDragaInputText = () => {
+const NavDragaInputText = ({ setState }) => {
   const ref = useRef(null);
-  const [size, setSize] = useState({ x: 200, y: 50 });
+  const [imageSrc, setImageSrc] = useState('');
 
-  const [, drag] = useDrag({
+  const getImage = useCallback(async () => {
+    const input = document.getElementById(`navTextArea`);
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL('image/png');
+    setState((state) => ({
+      ...state,
+      textArea: imgData,
+    }));
+    setImageSrc(imgData);
+  }, [imageSrc]);
+
+  const [collected, drag, preview] = useDrag({
     type: 'TEXTAREA',
+    collect: (monitor) => ({ monitor }),
     item: (monitor, item) => {
       const rect = ref.current.getBoundingClientRect();
       return {
@@ -22,8 +42,8 @@ const NavDragaInputText = () => {
             y: 0,
           },
           value: '',
-          width: size.x,
-          height: size.y,
+          width: 200,
+          height: 50,
           fontSet: {
             fontSize: '14px',
             textAlign: 'left',
@@ -39,18 +59,31 @@ const NavDragaInputText = () => {
     drag(node);
     ref.current = node;
   };
+  useEffect(() => {
+    getImage();
+  }, []);
 
   return (
     <Fragment>
       <div
         className={
-          ' flex items-center justify-center box-border focus:bg-red-400 p-1 min-h-[50px] min-w-[200px] z-10 '
+          ' flex items-center justify-center box-border focus:bg-red-400 p-1 z-10 w-full relative'
         }>
+        <DragPreviewImage
+          connect={preview}
+          src={
+            imageSrc ||
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmg6e5Sl03m4GcuRV9uTqrW6sMDPwqWfabIg&usqp=CAU'
+          }
+        />
+
         <textarea
           ref={combinedRef}
+          id={'navTextArea'}
           className={
-            'resize-none p-2 rounded-[5px] w-[200px] h-[50px] disabled:bg-[#ffffff] cursor-pointer overflow-hidden'
+            'resize-none p-2 rounded-[5px] w-[200px] h-[50px] disabled:bg-[#fff] top-0 absolute translate-x-m100'
           }
+          style={{ opacity: collected.isDragging ? 0.5 : 1 }}
           disabled
         />
       </div>

@@ -46,7 +46,7 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
         `pdf-container-page${pagesRendered}`
       );
       const canvas = await html2canvas(input);
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png', 1);
       setComponents((prev) => [...prev, imgData]);
       if (pagesRendered !== numPages) {
         setPagesRendered((prev) => prev + 1);

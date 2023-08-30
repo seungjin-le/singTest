@@ -2,18 +2,43 @@ import React, { useRef, useState } from 'react';
 import { TextField } from '@mui/material';
 import DragaInputText from './NavDragaInputText';
 import NavDragaCheckBox from './NavDragaCheckBox';
-import SignatureCanvas from 'react-signature-canvas';
 import StampTabs from '../tabs/StampTabs';
+import NavDragaForm from './NavDragaForm';
+
+const testData = [
+  {
+    type: 'admin',
+    email: 'leeseungjin@naver.com',
+    name: '이승진',
+  },
+  {
+    type: 'user',
+    email: 'bibibig@naver.com',
+    name: '김빅빅',
+  },
+  {
+    type: 'user',
+    email: 'lebibi@naver.com',
+    name: '이빅빅',
+  },
+  {
+    type: 'user',
+    email: 'Parkbibi@naver.com',
+    name: '박빅빅',
+  },
+];
 
 const Nav = ({ onClick }) => {
   const [name, setName] = useState('');
-
-  const canvasSign = useRef();
-
+  const [previewImage, setPreviewImage] = useState({
+    textArea: '',
+    stamp: '',
+    checkBox: '',
+  });
   const onChange = ({ target: { value } }) => setName(value);
 
   return (
-    <div className="w-full h-full max-w-[400px] flex flex-col items-center justify-start p-8 bg-sky-100 overflow-scroll">
+    <div className="w-full h-full max-w-[400px] flex flex-col items-center justify-start p-8 bg-sky-100 overflow-scroll overflow-x-hidden">
       <div className="w-full flex flex-col items-center justify-center">
         <div className={'text-3xl my-6 '}>도장</div>
         <TextField
@@ -26,23 +51,17 @@ const Nav = ({ onClick }) => {
         <div className="text-2xl mb-4">모양</div>
         <StampTabs name={name} />
       </div>
-
-      <div className="mb-6">Sign</div>
-      <button className="border-[red] border-2" onClick={onClick}>
-        <SignatureCanvas
-          canvasProps={{
-            id: 'signCanvas',
-            className: 'signature-canvas',
-            width: 300,
-            height: 150,
-          }}
-          ref={canvasSign}
+      {testData.map((item) => (
+        <NavDragaForm
+          item={item}
+          previewImage={previewImage}
+          setPreviewImage={setPreviewImage}
         />
-      </button>
-      <div className="my-6">Input Text Area</div>
-      <DragaInputText />
-      <div className="my-6">Check Box</div>
-      <NavDragaCheckBox />
+      ))}
+      <div className={'absolute -left-full'}>
+        <DragaInputText setState={setPreviewImage} />
+        <NavDragaCheckBox setState={setPreviewImage} />
+      </div>
     </div>
   );
 };

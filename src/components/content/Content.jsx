@@ -42,6 +42,10 @@ const TestData = [
   {
     id: 'stamp-1',
     type: 'stamp',
+    info: {
+      name: '김빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 396.0104064941406,
@@ -70,6 +74,10 @@ const TestData = [
   {
     id: 'stamp-2',
     type: 'stamp',
+    info: {
+      name: '이빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 248.01040649414062,
@@ -98,6 +106,10 @@ const TestData = [
   {
     id: 'stamp-3',
     type: 'stamp',
+    info: {
+      name: '박빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 451.0104064941406,
@@ -126,6 +138,10 @@ const TestData = [
   {
     id: 'stamp-4',
     type: 'stamp',
+    info: {
+      name: '이빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 470.0104064941406,
@@ -154,6 +170,10 @@ const TestData = [
   {
     id: 'stamp-5',
     type: 'stamp',
+    info: {
+      name: '이빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 713.0104064941406,
@@ -182,6 +202,10 @@ const TestData = [
   {
     id: 'stamp-6',
     type: 'stamp',
+    info: {
+      name: '김빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 673.0104064941406,
@@ -208,6 +232,10 @@ const TestData = [
   {
     id: 'stamp-7',
     type: 'stamp',
+    info: {
+      name: '김빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 550.0104064941406,
@@ -234,6 +262,10 @@ const TestData = [
   {
     id: 'textArea-8',
     type: 'textArea',
+    info: {
+      name: '김빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 587.0104064941406,
@@ -265,6 +297,10 @@ const TestData = [
   {
     id: 'stamp-9',
     type: 'stamp',
+    info: {
+      name: '김빅빅',
+      email: 'bibibig@naver.com',
+    },
     offset: {
       defaultPosition: {
         x: 753.0104064941406,
@@ -292,7 +328,7 @@ const TestData = [
   },
 ];
 
-const Content = ({ onClick }) => {
+const Content = () => {
   const dropRef = useRef(null);
   const [mode, setMode] = useState(false);
   const [droppedItems, setDroppedItems] = useState([]);

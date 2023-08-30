@@ -33,8 +33,10 @@ const NavSignStamp = ({ type, value }) => {
     ref.current = node;
   };
   return (
-    <div ref={combinedRef} style={{ width: '100%', height: '200px' }}>
-      <img src={value} alt={'sign'} className={'w-full'} />
+    <div
+      ref={combinedRef}
+      className={'w-full h-[200px] flex items-center justify-center'}>
+      {value && <img src={value} alt={'sign'} className={' max-h-[200px]'} />}
     </div>
   );
 };

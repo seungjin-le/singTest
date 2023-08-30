@@ -121,6 +121,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
             className={
               'resize-none p-2 rounded-[5px] w-60px h-full z-20 box-border whitespace-nowrap overflow-hidden'
             }
+            wrap="virtual"
             disabled={mode && inputValue ? true : false}
             onBlur={handlerTextAreaOnBlur}
             value={inputValue}
@@ -137,6 +138,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
               fontWeight: item?.fontSet?.fontWeight,
               width: size.x - 2,
               height: size.y - 2,
+              maxWidth: size.x - 2,
             }}
           />
           {mouseOver && !mode && (
