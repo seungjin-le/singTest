@@ -24,7 +24,7 @@ const NavDragaCheckBox = ({ style, index, onDelete, item, setState }) => {
       checkBox: imgData,
     }));
   }, [setState]);
-  const [{ isDragging }, drag] = useDrag({
+  const [, drag] = useDrag({
     type: 'CHECKBOX',
     item: (monitor, item) => {
       const rect = ref.current.getBoundingClientRect();

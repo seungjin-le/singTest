@@ -1,6 +1,6 @@
 import React from 'react';
-import TextAreaWeight from '../toolTips/TextAreaWeight';
-import ColorPicker from '../toolTips/ColorPicker';
+import TextAreaWeight from './TextAreaWeight';
+import ColorPicker from './ColorPicker';
 
 const fontSizes = [
   { label: '10px', value: '10px' },

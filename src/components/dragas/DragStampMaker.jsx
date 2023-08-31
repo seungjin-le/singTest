@@ -1,14 +1,13 @@
-import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
-import ToolTip from '../toolTips/ToolTip';
-import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
 import DragReSizing from './DragReSizing';
-import styled from 'styled-components';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import MakerLine from '../dragPositionLine/MakerLine';
+import { Tooltip } from '@mui/material';
 
-const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
+const DragStampMaker = ({ item, setState, style, onDelete, mode }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
-  const [inputValue, setInputValue] = useState(item.value);
   const [position, setPosition] = useState(item.offset.position);
   const [size, setSize] = useState({
     x: item.offset.width || 200,
@@ -46,7 +45,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       const onMouseMove = (mouseMoveEvent) => {
         const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
         const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
-        changeSize = { x: Math.max(newX, 100), y: Math.max(newY, 25) };
+        changeSize = { x: Math.max(newX, 40), y: Math.max(newY, 40) };
         setSize(changeSize);
       };
 
@@ -74,22 +73,6 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     [item, setState]
   );
 
-  const handlerTextAreaOnBlur = useCallback(
-    ({ target: { value } }) => {
-      setState((prev) => {
-        return prev.map((data) =>
-          data.id === item.id
-            ? {
-                ...data,
-                value: inputValue,
-              }
-            : data
-        );
-      });
-    },
-    [item, inputValue]
-  );
-
   return (
     <Fragment>
       <Draggable
@@ -103,36 +86,42 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
         defaultClassName={'z-10'}>
         <div
           ref={nodeRef}
-          className="box box-border h-auto p-[1px] rounded-[5px] flex items-center justify-center"
+          className="box box-border h-auto flex items-center justify-center"
           style={{
             opacity: Opacity ? '0.6' : '1',
             ...style,
             width: size.x,
-            height: size.y,
+            height: size.x,
           }}
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}>
-          <TextArea
-            wrap="virtual"
-            disabled={mode && inputValue ? true : false}
-            onBlur={handlerTextAreaOnBlur}
-            value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value);
-            }}
-            onDoubleClick={(e) => {
-              e.stopPropagation();
-            }}
-            style={{
-              fontSize: item?.fontSet?.fontSize,
-              textAlign: item?.fontSet?.textAlign,
-              color: item?.fontSet?.color,
-              fontWeight: item?.fontSet?.fontWeight,
-              width: size.x - 2,
-              height: size.y - 2,
-              maxWidth: size.x - 2,
-            }}
-          />
+          {item.value ? (
+            <img
+              src={item?.value}
+              alt=""
+              style={{
+                width: size.x,
+                height: size.y,
+                userSelect: 'none',
+              }}
+              draggable={false}
+            />
+          ) : (
+            <Fragment>
+              <span className={'absolute left-1/2 bottom-full z-[0]'}>
+                <Tooltip
+                  title={`${item?.info?.name}님의 사인/도장`}
+                  arrow
+                  open={true}
+                  placement={'top'}
+                  sx={{ zIndex: 0 }}
+                />
+              </span>
+              <RadioButtonCheckedIcon
+                sx={{ color: 'gray', fontSize: size.x, marginRight: 0 }}
+              />
+            </Fragment>
+          )}
           {mouseOver && !mode && (
             <Fragment>
               <DragReSizing
@@ -140,17 +129,19 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
                 onDelete={onDelete}
                 item={item}
               />
-              <ToolTip item={item} onChange={onChange} />
             </Fragment>
           )}
         </div>
       </Draggable>
 
       {!mode && (
-        <DefaultPositionLine
+        <MakerLine
           item={item}
           disable={mouseOver}
-          size={size}
+          size={{
+            x: size.x,
+            y: size.x,
+          }}
           position={position}
         />
       )}
@@ -158,19 +149,4 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
   );
 };
 
-export default memo(DragTextArea);
-
-const TextArea = styled.textarea`
-  resize: none;
-  padding: 2px;
-  border-radius: 5px;
-  border: 1px solid gray;
-  width: 60px;
-  height: 100%;
-  z-index: 10;
-  box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.7);
-  &:focus {
-    outline: none;
-  }
-`;
+export default DragStampMaker;

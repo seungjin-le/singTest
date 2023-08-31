@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useRef, useState } from 'react';
 
 import Draggable from 'react-draggable';
 import styled from 'styled-components';
-import PositionLine from './PositionLine';
+import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
 import DragReSizing from './DragReSizing';
 
 const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
@@ -98,6 +98,7 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
         onDrag={(e, data) => trackPos(data)}
         onStart={handleStart}
         onStop={handleEnd}
+        bounds={'parent'}
         disabled={mode}
         position={position}
         defaultClassName={'z-10'}>
@@ -131,7 +132,7 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
         </div>
       </Draggable>
       {!mode && (
-        <PositionLine
+        <DefaultPositionLine
           item={item}
           disable={mouseOver}
           size={size}

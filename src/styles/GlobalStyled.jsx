@@ -51,6 +51,18 @@ const GlobalStyled = createGlobalStyle`
     font-style: normal;
     font-display: swap;
   }
+   .MuiTooltip-popper {
+     z-index: 0 !important;
+   }
+   body {
+     -webkit-user-select:none;
+     -moz-user-select:none;
+     -ms-user-select:none;
+     user-select:none
+   }
+   img {
+      user-drag: none;
+   }
 `;
 
 export default GlobalStyled;

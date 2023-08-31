@@ -4,6 +4,7 @@ import DragaInputText from './NavDragaInputText';
 import NavDragaCheckBox from './NavDragaCheckBox';
 import StampTabs from '../tabs/StampTabs';
 import NavDragaForm from './NavDragaForm';
+import NavDragStampMaker from './NavDragStampMaker';
 
 const testData = [
   {
@@ -28,7 +29,7 @@ const testData = [
   },
 ];
 
-const Nav = ({ onClick }) => {
+const Nav = ({ params, setStamp }) => {
   const [name, setName] = useState('');
   const [previewImage, setPreviewImage] = useState({
     textArea: '',
@@ -38,27 +39,26 @@ const Nav = ({ onClick }) => {
   const onChange = ({ target: { value } }) => setName(value);
 
   return (
-    <div className="w-full h-full max-w-[400px] flex flex-col items-center justify-start p-8 bg-sky-100 overflow-scroll overflow-x-hidden">
-      <div className="w-full flex flex-col items-center justify-center">
-        <div className={'text-3xl my-6 '}>도장</div>
-        <TextField
-          id="outlined-basic"
-          label="이름"
-          variant="outlined"
-          value={name}
-          onChange={onChange}
-        />
-        <div className="text-2xl mb-4">모양</div>
-        <StampTabs name={name} />
-      </div>
-      {testData.map((item) => (
-        <NavDragaForm
-          item={item}
-          previewImage={previewImage}
-          setPreviewImage={setPreviewImage}
-        />
-      ))}
+    <div className="w-full h-full max-w-[400px] flex flex-col items-center justify-start p-8 bg-sky-100 overflow-scroll overflow-x-hidden z-5">
+      {params?.name && (
+        <div className="w-full flex flex-col items-center justify-center">
+          <div className={'text-3xl my-6 '}>도장</div>
+          <StampTabs name={params?.name} setStamps={setStamp} />
+        </div>
+      )}
+      {testData.map((item) => {
+        return (
+          (!params?.name || item?.name === params?.name) && (
+            <NavDragaForm
+              item={item}
+              previewImage={previewImage}
+              setPreviewImage={setPreviewImage}
+            />
+          )
+        );
+      })}
       <div className={'absolute -left-full'}>
+        <NavDragStampMaker setState={setPreviewImage} />
         <DragaInputText setState={setPreviewImage} />
         <NavDragaCheckBox setState={setPreviewImage} />
       </div>

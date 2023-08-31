@@ -74,20 +74,22 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
       id="pdf-container"
       ref={containerRef}
       className={
-        'w-full h-full overflow-scroll flex justify-center flex-col items-center p-4 z-0'
+        'w-full h-auto flex justify-center flex-col items-center p-4 z-0'
       }>
       <button onClick={downloadPdf}>Download PDF</button>
       <div className={'h-full w-full'} ref={combinedRef}>
         <Document
           file="/pdfs/계약서예시.pdf"
-          className={'w-full h-full z-0'}
+          className={'w-full h-full z-0 relative'}
           onLoadSuccess={onDocumentLoadSuccess}>
           {downloading ? (
             <Fragment>
               <div
                 key={`page_${pagesRendered}`}
                 className={'mb-4 w-full h-auto flex justify-center'}>
-                <span id={`pdf-container-page${pagesRendered}`}>
+                <span
+                  id={`pdf-container-page${pagesRendered} asdfasdfasdf`}
+                  className={'relative'}>
                   <Page
                     pageNumber={pagesRendered}
                     onLoadSuccess={onPageRenderSuccess}
@@ -108,7 +110,9 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
               <div
                 key={`page_${currentPage}`}
                 className={'mb-4 w-full h-auto flex justify-center'}>
-                <span id={`pdf-container-page${currentPage}`}>
+                <span
+                  id={`pdf-container-page${currentPage}`}
+                  className={'relative'}>
                   <Page pageNumber={currentPage} />
                   {children.map(
                     (item) => item?.props?.item.page === currentPage && item
@@ -116,6 +120,7 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
                 </span>
               </div>
               <Pagination
+                key={`pagination_${currentPage}`}
                 count={numPages}
                 page={currentPage}
                 onChange={onChangePage}
@@ -141,5 +146,9 @@ const PdfViewContainer = styled.div`
     justify-content: center;
     display: inline;
     width: auto;
+  }
+  & .MuiPagination-text > ul {
+    align-items: center;
+    justify-content: center;
   }
 `;

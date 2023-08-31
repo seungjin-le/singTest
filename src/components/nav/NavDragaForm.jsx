@@ -4,7 +4,6 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import AddIcon from '@mui/icons-material/Add';
-import NavDragaInputText from './NavDragaInputText';
 import { DragPreviewImage, useDrag } from 'react-dnd';
 
 const userItems = [
@@ -115,6 +114,40 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
       isDragging: monitor.isDragging(),
     }),
   });
+  const [, drag, stampPreview] = useDrag({
+    type: 'DIV',
+    collect: (monitor) => ({ monitor }),
+    item: (monitor) => {
+      const rect = stampRef.current.getBoundingClientRect();
+
+      return {
+        id: `stampMaker-`,
+        type: 'stampMaker',
+        info: {
+          name: item?.name,
+          email: item?.email,
+        },
+        offset: {
+          defaultPosition: {
+            x: monitor.getClientOffset().x - rect.left,
+            y: monitor.getClientOffset().y - rect.top,
+          },
+          position: {
+            x: 0,
+            y: 0,
+          },
+          value: '',
+          width: 50,
+          height: 50,
+        },
+        value: '',
+      };
+    },
+  });
+  const stampCombinedRef = (node) => {
+    drag(node);
+    stampRef.current = node;
+  };
 
   const textAreaCombinedRef = (node) => {
     textAreaDrag(node);
@@ -125,7 +158,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
     checkBoxRef.current = node;
   };
 
-  const user = ({ children, text, index, type }) => {
+  const user = ({ children, text, type }, index) => {
     return (
       <ItemBox
         key={index}
@@ -134,7 +167,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
             ? textAreaCombinedRef
             : type === 'checkBox'
             ? checkBoxCombinedRef
-            : stampRef
+            : stampCombinedRef
         }>
         {children} {text}
         <DragPreviewImage
@@ -143,7 +176,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
               ? textAreaPreview
               : type === 'checkBox'
               ? checkBoxPreview
-              : stampRef
+              : stampPreview
           }
           src={previewImage[type]}
         />

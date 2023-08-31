@@ -29,6 +29,7 @@ const NavDragaInputText = ({ setState }) => {
     collect: (monitor) => ({ monitor }),
     item: (monitor, item) => {
       const rect = ref.current.getBoundingClientRect();
+
       return {
         id: `textArea-`,
         type: 'textArea',

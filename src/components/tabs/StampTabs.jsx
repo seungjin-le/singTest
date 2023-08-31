@@ -1,9 +1,10 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useRef, useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
 import styled from 'styled-components';
 import NavStamp from '../nav/NavStamp';
 import SignatureCanvas from 'react-signature-canvas';
 import NavSignStamp from '../nav/NavSignStamp';
+import html2canvas from 'html2canvas';
 
 const fonts = [
   'JSArirang',
@@ -15,7 +16,7 @@ const fonts = [
 ];
 const defaultName = ['홍', '길', '동'];
 
-const StampTabs = ({ name }) => {
+const StampTabs = ({ name, setStamps }) => {
   const [value, setValue] = useState(0);
   const [selectedFont, setSelectedFont] = useState('');
   const canvasSign = useRef(null);
@@ -28,8 +29,9 @@ const StampTabs = ({ name }) => {
     return format.length > 2 ? format : defaultName;
   };
   const format = getDisplayName(name);
-  const StampShape = ({ className, format, onClick }) => (
+  const StampShape = ({ className, format, onClick, id }) => (
     <div
+      id={id}
       onClick={onClick}
       className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer`}>
       <span className={`${className}`}>{format}</span>
@@ -44,8 +46,16 @@ const StampTabs = ({ name }) => {
   };
   const handleCanvasEnd = () => {
     setSignImage(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
+    setStamps(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
   };
-
+  const handleOnClickStamp = async (id) => {
+    const stamp = document.getElementById(id);
+    const canvas = await html2canvas(stamp, {
+      backgroundColor: null,
+    });
+    const imgData = canvas.toDataURL('image/png');
+    setStamps(imgData);
+  };
   return (
     <Box className={'w-full'}>
       <StyledTabs
@@ -65,17 +75,17 @@ const StampTabs = ({ name }) => {
             return (
               <StampShape
                 key={font}
-                label={font}
+                id={font}
                 className={`border-4 font-bold border-red-600 flex  text-center p-0  z-10 text-[red] text-3xl flex-1
               ${shape(value)} `}
                 type={value}
-                onClick={() => setSelectedFont(font)}
+                onClick={() => handleOnClickStamp(font)}
                 format={
                   <Fragment>
-                    {format.map((item) => (
+                    {format.map((item, index) => (
                       <span
                         style={{ fontFamily: font }}
-                        key={item}
+                        key={index}
                         className={`${
                           (value !== 0 || value !== 3) &&
                           'block w-[25px] h-[25px]'

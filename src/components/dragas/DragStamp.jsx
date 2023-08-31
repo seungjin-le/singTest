@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import Draggable from 'react-draggable';
 import DragReSizing from './DragReSizing';
-import PositionLine from './PositionLine';
+import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
 
 const DragStamp = ({ style, onDelete, item, setState, mode }) => {
   const nodeRef = useRef(null);
@@ -59,8 +59,8 @@ const DragStamp = ({ style, onDelete, item, setState, mode }) => {
         const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
         const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
         changeSize = {
-          x: Math.min(Math.max(newX, 80), 150),
-          y: Math.min(Math.max(newY, 80), 150),
+          x: Math.min(Math.max(newX, 50), 150),
+          y: Math.min(Math.max(newY, 50), 150),
         };
         setSize(changeSize);
       };
@@ -99,6 +99,7 @@ const DragStamp = ({ style, onDelete, item, setState, mode }) => {
         onDrag={(e, data) => trackPos(data)}
         onStart={() => setOpacity(true)}
         onStop={handleEnd}
+        bounds={'parent'}
         position={position}
         disabled={mode}
         defaultClassName={'z-10'}>
@@ -112,7 +113,7 @@ const DragStamp = ({ style, onDelete, item, setState, mode }) => {
           }}
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}
-          className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer`}>
+          className={`flex flex-col items-center justify-center   cursor-pointer`}>
           {item.offset.shapeType !== 3 ? (
             <span
               className={`${style} border-4 font-bold border-red-600 flex text-center p-0  z-10 text-[red] text-3xl flex-1 ${stampShape(
@@ -144,7 +145,7 @@ const DragStamp = ({ style, onDelete, item, setState, mode }) => {
       </Draggable>
       {mouseOver && !mode && (
         <Fragment>
-          <PositionLine
+          <DefaultPositionLine
             item={item}
             disable={mouseOver}
             size={size}
