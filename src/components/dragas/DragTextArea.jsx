@@ -73,6 +73,16 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     },
     [item, setState]
   );
+  const handleTextAreaOnChange = ({ target }) => {
+    const scrollWidth = target.scrollWidth;
+    const clientWidth = target.clientWidth;
+    const { value } = target;
+
+    // textarea가 꽉 찼을 때 더 이상 입력하지 못하게 하기
+    if (scrollWidth > clientWidth) return;
+
+    setInputValue(value);
+  };
 
   const handlerTextAreaOnBlur = useCallback(
     ({ target: { value } }) => {
@@ -117,9 +127,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
             disabled={mode && inputValue ? true : false}
             onBlur={handlerTextAreaOnBlur}
             value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value);
-            }}
+            onChange={handleTextAreaOnChange}
             onDoubleClick={(e) => {
               e.stopPropagation();
             }}
@@ -128,9 +136,9 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
               textAlign: item?.fontSet?.textAlign,
               color: item?.fontSet?.color,
               fontWeight: item?.fontSet?.fontWeight,
-              width: size.x - 2,
-              height: size.y - 2,
-              maxWidth: size.x - 2,
+              width: size.x,
+              height: size.y,
+              maxWidth: size.x,
             }}
           />
           {mouseOver && !mode && (
@@ -170,6 +178,7 @@ const TextArea = styled.textarea`
   z-index: 10;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
   &:focus {
     outline: none;
   }
