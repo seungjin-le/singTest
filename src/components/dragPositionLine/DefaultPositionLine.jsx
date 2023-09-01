@@ -3,7 +3,7 @@ import React, { Fragment } from 'react';
 const DefaultPositionLine = ({ item, disable, size, position }) => {
   return (
     <Fragment>
-      {disable ? (
+      {true ? (
         <Fragment>
           <span
             style={{
