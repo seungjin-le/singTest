@@ -1,4 +1,11 @@
-import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Draggable from 'react-draggable';
 import ToolTip from '../toolTips/ToolTip';
 import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
@@ -54,62 +61,105 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     [position]
   );
 
-  const handleReSizing = useCallback(
-    (mouseDownEvent) => {
-      mouseDownEvent.stopPropagation();
-      setShowPosLine(true);
-      let changeSize = {};
-      const startPosition = {
-        x: mouseDownEvent.pageX,
-        y: mouseDownEvent.pageY,
-      };
-      const onMouseMove = (mouseMoveEvent) => {
-        console.log(mouseMoveEvent.pageX, mouseMoveEvent.pageY);
-        const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
-        const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
-
-        const contentHeight = inputRef.current.scrollHeight;
-        const clientHeight = inputRef.current.clientHeight;
-        console.log(contentHeight, newY, clientHeight);
-
-        changeSize = {
-          x: Math.max(newX, 10),
-          y: Math.max(
-            contentHeight !== clientHeight ? contentHeight : newY,
-            20
-          ),
-        };
-        setSize({
-          x: Math.max(newX, 10),
-          y: changeSize.y,
-        });
-      };
-
-      const onMouseUp = () => {
-        setShowPosLine(false);
-        setSize({ x: changeSize.x, y: changeSize.y });
-        setState((prev) => {
-          return prev.map((data) =>
-            data.id === item.id
-              ? {
-                  ...data,
-                  offset: {
-                    ...data.offset,
-                    width: changeSize.x,
-                    height: changeSize.y,
-                  },
-                }
-              : data
-          );
-        });
-        document.body.removeEventListener('mousemove', onMouseMove);
-      };
-
-      document.body.addEventListener('mousemove', onMouseMove);
-      document.body.addEventListener('mouseup', onMouseUp, { once: true });
+  const getContentHeight = useCallback(
+    (textArea) => {
+      // textarea 엘리먼트의 클론 div룰 생성
+      const clone = document.createElement('div');
+      // 클론의 너비, 패딩, 폰트, whiteSpace, wordWrap 등 을 textArea와 같도록 설정.
+      clone.style.width = textArea.offsetWidth + 'px';
+      clone.style.padding = getComputedStyle(textArea).padding;
+      clone.style.font = getComputedStyle(textArea).font;
+      clone.style.whiteSpace = 'pre-wrap';
+      clone.style.wordWrap = 'break-word';
+      clone.style.visibility = 'hidden';
+      // 클론을 문서의 body에 추가.
+      document.body.appendChild(clone);
+      // 클론의 텍스트 콘텐츠를 textarea의 값으로 설정.
+      clone.textContent = textArea.value;
+      // 클론의 오프셋 높이를 저장. 이것이 콘텐츠의 높이
+      const contentHeight = clone.offsetHeight;
+      // 클론을 문서의 body에서 제거.
+      document.body.removeChild(clone);
+      // 콘텐츠의 높이를 반환.
+      return contentHeight;
     },
-    [item, setState, size]
+    [item.offset, inputValue]
   );
+  // textarea의 콘텐츠 너비를 반환하는 함수.
+  const getContentWidth = useCallback(
+    (textArea) => {
+      // textarea 엘리먼트의 클론을 생성합니다.
+      const clone = document.createElement('span');
+      // 클론의 폰트, whiteSpace 등 을 textArea와 같도록 설정.
+      clone.style.font = getComputedStyle(textArea).font;
+      clone.style.whiteSpace = 'pre';
+      clone.style.visibility = 'hidden';
+      // 클론을 문서의 body에 추가합니다.
+      document.body.appendChild(clone);
+      // 클론의 텍스트 콘텐츠를 textarea의 값으로 설정.
+      clone.textContent = textArea.value;
+      // 클론의 오프셋 너비를 저장. 이것이 콘텐츠의 너비.
+      const contentWidth = clone.offsetWidth + 4; // 4를 더하는 이유는 텍스트의 padding를 고려.
+      // 클론을 문서의 body에서 제거.
+      document.body.removeChild(clone);
+      // 콘텐츠의 너비를 반환.
+      return contentWidth;
+    },
+    [item.offset, inputValue]
+  );
+
+  const handleReSizing = (mouseDownEvent) => {
+    mouseDownEvent.stopPropagation();
+    setShowPosLine(true);
+    const getTextAreaHeight = getContentHeight(inputRef?.current);
+    const getTextAreaWidth = getContentWidth(inputRef?.current);
+    let changeSize = {};
+    const startPosition = {
+      x: mouseDownEvent.pageX,
+      y: mouseDownEvent.pageY,
+    };
+
+    const onMouseMove = (mouseMoveEvent) => {
+      const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
+      const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
+      if (!inputRef?.current) return;
+
+      const newWidth = Math.max(
+        newX <= getTextAreaWidth ? getTextAreaWidth : newX,
+        10
+      );
+      const newHeight = Math.max(
+        newY <= getTextAreaHeight ? getTextAreaHeight : newY,
+        20
+      );
+      console.log(newX, getTextAreaWidth);
+      setSize({ x: newWidth, y: newHeight });
+    };
+
+    const onMouseUp = () => {
+      setShowPosLine(false);
+
+      setState((prev) => {
+        return prev.map((data) =>
+          data.id === item.id
+            ? {
+                ...data,
+                offset: {
+                  ...data.offset,
+                  width: changeSize.x,
+                  height: changeSize.y,
+                },
+              }
+            : data
+        );
+      });
+      document.body.removeEventListener('mousemove', onMouseMove);
+    };
+
+    document.body.addEventListener('mousemove', onMouseMove);
+    document.body.addEventListener('mouseup', onMouseUp, { once: true });
+  };
+
   const handleTextAreaOnChange = ({ target }) => {
     const scrollHeight = target.scrollHeight;
     const { value } = target;
@@ -154,6 +204,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
             ...style,
             width: size.x,
             height: size.y,
+            minWidth: size.x,
             maxHeight: size.y,
           }}
           onMouseOver={() => setMouseOver(true)}
@@ -214,11 +265,12 @@ const TextArea = styled.textarea`
   display: block;
   z-index: 10;
   box-sizing: content-box;
+  padding: 0;
+  border: none;
   background: rgba(255, 255, 255, 0.7);
   letter-spacing: 0;
   word-break: break-all;
   outline: 1px dashed black;
-  z-index: 10;
   &:focus {
     outline: none;
   }
