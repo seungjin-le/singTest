@@ -11,15 +11,21 @@ const layerStyles = {
   top: 0,
 };
 
-function getItemStyles(currentOffset) {
-  if (!currentOffset) {
+function getItemStyles(initialOffset, currentOffset, item) {
+  if (!initialOffset || !currentOffset) {
     return {
       display: 'none',
     };
   }
 
-  const { x, y } = currentOffset;
-  const transform = `translate(${x}px, ${y}px)`;
+  let { x, y } = currentOffset;
+  if (item.type === 'stampMaker') {
+    x -= 25;
+    y -= 25;
+  }
+  const transform = `translate(${x + item.offset.defaultPosition.x}px, ${
+    y + item.offset.defaultPosition.y
+  }px)`;
 
   return {
     transform,
@@ -28,12 +34,14 @@ function getItemStyles(currentOffset) {
 }
 
 const NavTestInput = () => {
-  const { itemType, isDragging, currentOffset } = useDragLayer((monitor) => ({
-    item: monitor.getItem(),
-    itemType: monitor.getItemType(),
-    isDragging: monitor.isDragging(),
-    currentOffset: monitor.getSourceClientOffset(),
-  }));
+  const { itemType, isDragging, currentOffset, initialOffset, item } =
+    useDragLayer((monitor) => ({
+      item: monitor.getItem(),
+      itemType: monitor.getItemType(),
+      initialOffset: monitor.getInitialSourceClientOffset(),
+      isDragging: monitor.isDragging(),
+      currentOffset: monitor.getSourceClientOffset(),
+    }));
 
   const renderItem = () => {
     switch (itemType) {
@@ -56,7 +64,9 @@ const NavTestInput = () => {
 
   return (
     <div style={layerStyles}>
-      <div style={getItemStyles(currentOffset)}>{renderItem()}</div>
+      <div style={getItemStyles(initialOffset, currentOffset, item)}>
+        {renderItem()}
+      </div>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import AddIcon from '@mui/icons-material/Add';
-import { DragPreviewImage, useDrag } from 'react-dnd';
+import { useDrag } from 'react-dnd';
 
 const userItems = [
   {
@@ -55,6 +55,11 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
         textAreaDragging: monitor.isDragging(),
       };
     },
+    previewOptions: {
+      anchorX: 0.5,
+      anchorY: 0.5,
+      captureDraggingState: true,
+    },
     item: (monitor) => {
       const rect = textAreaRef.current.getBoundingClientRect();
       return {
@@ -86,6 +91,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
         value: '',
       };
     },
+
     end: (item, monitor) => {},
   });
 
