@@ -115,6 +115,7 @@ const DragStampMaker = ({ item, setState, style, onDelete, mode }) => {
                   open={true}
                   placement={'top'}
                   sx={{ zIndex: 0 }}
+                  //children={<Fragment></Fragment>}
                 />
               </span>
               <RadioButtonCheckedIcon

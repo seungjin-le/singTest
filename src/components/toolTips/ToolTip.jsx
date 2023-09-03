@@ -21,6 +21,12 @@ const fontSizes = [
   { label: '25px', value: '25px' },
 ];
 
+const fontSort = [
+  { label: '왼쪽', value: 'left' },
+  { label: '중앙', value: 'center' },
+  { label: '오른쪽', value: 'right' },
+];
+
 const ToolTip = ({ item, onChange }) => {
   return (
     <div
@@ -32,6 +38,7 @@ const ToolTip = ({ item, onChange }) => {
         <div className={'w-auto p-3 whitespace-nowrap'}>폰트 크기</div>
         <div className={'w-full flex flex-row justify-center items-center '}>
           <select
+            onMouseDown={(e) => e.stopPropagation()}
             onChange={(e) => onChange(e, item?.id, 'fontSize')}
             value={item?.fontSet?.fontSize || '14px'}>
             {fontSizes.map((item) => (
@@ -46,21 +53,14 @@ const ToolTip = ({ item, onChange }) => {
         <div className={'w-auto p-3 whitespace-nowrap'}>정렬</div>
         <div
           className={'w-full flex flex-row justify-between items-center px-4'}>
-          <button
-            value={'left'}
-            onClick={(e) => onChange(e, item?.id, 'textSort')}>
-            왼쪽
-          </button>
-          <button
-            value={'center'}
-            onClick={(e) => onChange(e, item?.id, 'textSort')}>
-            중앙
-          </button>
-          <button
-            value={'right'}
-            onClick={(e) => onChange(e, item?.id, 'textSort')}>
-            오른쪽
-          </button>
+          {fontSort.map((sortItem) => (
+            <button
+              value={sortItem.value}
+              onClick={(e) => onChange(e, item?.id, 'textSort')}
+              key={sortItem.label}>
+              {sortItem.label}
+            </button>
+          ))}
         </div>
       </div>
       <div className={'flex flex-row justify-start items-center'}>

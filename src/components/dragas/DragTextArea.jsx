@@ -24,12 +24,48 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     x: item.offset.width || 200,
     y: item.offset.height || 50,
   });
-
   const [Opacity, setOpacity] = useState(false);
-  const trackPos = (data) => {
-    setPosition({ x: data.x, y: data.y });
-  };
 
+  // Component 사이즈 업데이트
+  const updateSize = useCallback(
+    (newWidth, newHeight) => {
+      setState((prev) => {
+        return prev.map((data) =>
+          data.id === item.id
+            ? {
+                ...data,
+                offset: {
+                  ...data.offset,
+                  width: newWidth,
+                  height: newHeight,
+                },
+              }
+            : data
+        );
+      });
+      setSize({
+        x: newWidth,
+        y: newHeight,
+      });
+    },
+    [size]
+  );
+
+  // Component Dragging
+  const handleInputDrag = useCallback(
+    (data) => {
+      setPosition({ x: data.x, y: data.y });
+      const { x, y } = position;
+      if (data.x === x && data.y === y) return;
+      setOpacity(true);
+      setInputFocus(false);
+      setShowPosLine(true);
+      setMouseOver(true);
+    },
+    [position]
+  );
+
+  // Component Dragging End
   const handleEnd = useCallback(() => {
     const { x, y } = item.offset.position;
     setMouseOver(false);
@@ -49,27 +85,16 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     });
   }, [item, position, setState]);
 
-  const handleInputDrag = useCallback(
-    (data) => {
-      trackPos(data);
-      const { x, y } = position;
-      if (data.x === x && data.y === y) return;
-      setInputFocus(false);
-      setShowPosLine(true);
-      setMouseOver(true);
-    },
-    [position]
-  );
-
+  // textarea의 내용 높이를 반환하는 함수.
   const getContentHeight = useCallback(
     (textArea) => {
       // textarea 엘리먼트의 클론 div룰 생성
       const clone = document.createElement('div');
-      // 클론의 너비, 패딩, 폰트, whiteSpace, wordWrap 등 을 textArea와 같도록 설정.
+      // 클론의 너비, 패딩, 폰트, whiteSpace, wordWrap 등 textArea와 같도록 설정.
       clone.style.width = textArea.offsetWidth + 'px';
       clone.style.padding = getComputedStyle(textArea).padding;
       clone.style.font = getComputedStyle(textArea).font;
-      clone.style.whiteSpace = 'pre-wrap';
+      clone.style.whiteSpace = 'pre';
       clone.style.wordWrap = 'break-word';
       clone.style.visibility = 'hidden';
       // 클론을 문서의 body에 추가.
@@ -85,12 +110,13 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     },
     [item.offset, item.fontSet, inputValue]
   );
-  // textarea의 콘텐츠 너비를 반환하는 함수.
+
+  // textarea의 내용 너비를 반환하는 함수.
   const getContentWidth = useCallback(
     (textArea) => {
       // textarea 엘리먼트의 클론을 생성합니다.
       const clone = document.createElement('span');
-      // 클론의 폰트, whiteSpace 등 을 textArea와 같도록 설정.
+      // 클론의 폰트, whiteSpace 등 textArea와 같도록 설정.
       clone.style.font = getComputedStyle(textArea).font;
       clone.style.whiteSpace = 'pre';
       clone.style.visibility = 'hidden';
@@ -108,51 +134,41 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     [item.offset, item.fontSet, inputValue]
   );
 
+  // textarea의 크기를 조정하는 함수.
   const handleReSizing = useCallback(
     (mouseDownEvent) => {
+      // Component의 사이즈 조절중 드레그 막기
       mouseDownEvent.stopPropagation();
+      // 사이즈 조정중 표시할 X축 Y축 선 보이기
       setShowPosLine(true);
+      // textarea 내용의 높이와 너비를 저장
       const getTextAreaHeight = getContentHeight(inputRef?.current);
       const getTextAreaWidth = getContentWidth(inputRef?.current);
       let changeSize = {};
+
+      // 드래그 시작 위치 저장
       const startPosition = {
         x: mouseDownEvent.pageX,
         y: mouseDownEvent.pageY,
       };
 
-      const onMouseMove = (mouseMoveEvent) => {
-        const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
-        const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
+      // 드래그 중 마우스 움직임에 따라 사이즈 조정
+      const onMouseMove = ({ pageX, pageY }) => {
+        const newX = size.x - startPosition.x + pageX;
+        const newY = size.y - startPosition.y + pageY;
         if (!inputRef?.current) return;
-
-        const newWidth = Math.max(
-          newX <= getTextAreaWidth ? getTextAreaWidth : newX,
-          10
-        );
-        const newHeight = Math.max(
-          newY <= getTextAreaHeight ? getTextAreaHeight : newY,
-          20
-        );
-        setSize({ x: newWidth, y: newHeight });
+        changeSize = {
+          x: Math.max(newX <= getTextAreaWidth ? getTextAreaWidth : newX, 10),
+          y: Math.max(newY <= getTextAreaHeight ? getTextAreaHeight : newY, 15),
+        };
+        setSize(changeSize);
       };
 
+      // 드래그 종료 시 사이즈 저장
       const onMouseUp = () => {
         setShowPosLine(false);
+        updateSize(changeSize.x, changeSize.y);
 
-        setState((prev) => {
-          return prev.map((data) =>
-            data.id === item.id
-              ? {
-                  ...data,
-                  offset: {
-                    ...data.offset,
-                    width: changeSize.x,
-                    height: changeSize.y,
-                  },
-                }
-              : data
-          );
-        });
         document.body.removeEventListener('mousemove', onMouseMove);
       };
 
@@ -173,6 +189,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     setInputValue(value);
   };
 
+  // TextArea의 Focus가 해제될 때
   const handlerTextAreaOnBlur = useCallback(
     ({ target: { value } }) => {
       setInputFocus(false);
@@ -189,6 +206,21 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     },
     [item, inputValue, inputFocus]
   );
+
+  // textarea의 fontSize가 변경될 때 내용의 크기가 textArea보다 클시 크기를 조정하는 함수.
+  useEffect(() => {
+    if (inputRef?.current) {
+      const getWidth = getContentWidth(inputRef?.current);
+      const getHeight = getContentHeight(inputRef?.current);
+      if (getWidth > size.x && getHeight > size.y) {
+        updateSize(getWidth, getHeight);
+      } else if (getWidth > size.x) {
+        updateSize(getWidth, size.y);
+      } else if (getHeight > size.y) {
+        updateSize(size.x, getHeight);
+      }
+    }
+  }, [item.fontSet]);
 
   return (
     <Fragment>
@@ -212,7 +244,6 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
             maxHeight: size.y,
           }}
           onBlur={(e) => {
-            console.log(e.relatedTarget);
             if (e.relatedTarget && e.relatedTarget.closest('body')) return;
             handlerTextAreaOnBlur(e);
           }}

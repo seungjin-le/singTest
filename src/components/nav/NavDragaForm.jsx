@@ -48,9 +48,13 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
     setType(item.type === 'admin');
   }, [item]);
 
-  const [, textAreaDrag, textAreaPreview] = useDrag({
+  const [{ textAreaDragging }, textAreaDrag, textAreaPreview] = useDrag({
     type: 'TEXTAREA',
-    collect: (monitor) => ({ monitor }),
+    collect: (monitor) => {
+      return {
+        textAreaDragging: monitor.isDragging(),
+      };
+    },
     item: (monitor) => {
       const rect = textAreaRef.current.getBoundingClientRect();
       return {
@@ -82,10 +86,16 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
         value: '',
       };
     },
+    end: (item, monitor) => {},
   });
 
-  const [, checkBoxDrag, checkBoxPreview] = useDrag({
+  const [{ checkBoxDragging }, checkBoxDrag] = useDrag({
     type: 'CHECKBOX',
+    collect: (monitor) => {
+      return {
+        checkBoxDragging: monitor.isDragging(),
+      };
+    },
     item: (monitor) => {
       const rect = checkBoxRef.current.getBoundingClientRect();
       return {
@@ -110,13 +120,14 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
         value: '',
       };
     },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
   });
-  const [, drag, stampPreview] = useDrag({
+  const [{ stampDragging }, drag] = useDrag({
     type: 'DIV',
-    collect: (monitor) => ({ monitor }),
+    collect: (monitor) => {
+      return {
+        stampDragging: monitor.isDragging(),
+      };
+    },
     item: (monitor) => {
       const rect = stampRef.current.getBoundingClientRect();
 
@@ -144,6 +155,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
       };
     },
   });
+
   const stampCombinedRef = (node) => {
     drag(node);
     stampRef.current = node;
@@ -162,6 +174,9 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
     return (
       <ItemBox
         key={index}
+        onMouseDown={(e) => (e.target.style.opacity = 0)}
+        onMouseUp={(e) => (e.target.style.opacity = 1)}
+        onMouseOut={(e) => (e.target.style.opacity = 1)}
         ref={
           type === 'textArea'
             ? textAreaCombinedRef
@@ -170,19 +185,17 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
             : stampCombinedRef
         }>
         {children} {text}
-        <DragPreviewImage
-          connect={
-            type === 'textArea'
-              ? textAreaPreview
-              : type === 'checkBox'
-              ? checkBoxPreview
-              : stampPreview
-          }
-          src={previewImage[type]}
-        />
       </ItemBox>
     );
   };
+
+  useEffect(() => {
+    if (textAreaRef?.current && textAreaDragging)
+      textAreaRef.current.style.opacity = 1;
+    if (checkBoxRef?.current && checkBoxDragging)
+      checkBoxRef.current.style.opacity = 1;
+    if (stampRef?.current && stampDragging) stampRef.current.style.opacity = 1;
+  }, [textAreaDragging, checkBoxDragging, stampDragging]);
 
   return (
     <div
@@ -195,6 +208,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
           {item.name}({item.email})
         </div>
       </TitleBox>
+
       <div className={'flex flex-col items-center w-full'}>
         {(type ? adminItems : userItems).map((item, index) =>
           user(item, index)

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { TextField } from '@mui/material';
-import DragaInputText from './NavDragaInputText';
-import NavDragaCheckBox from './NavDragaCheckBox';
 import StampTabs from '../tabs/StampTabs';
 import NavDragaForm from './NavDragaForm';
-import NavDragStampMaker from './NavDragStampMaker';
+import NavTestInput from './NavTestInput';
 
 const testData = [
   {
@@ -49,19 +46,11 @@ const Nav = ({ params, setStamp }) => {
       {testData.map((item) => {
         return (
           (!params?.name || item?.name === params?.name) && (
-            <NavDragaForm
-              item={item}
-              previewImage={previewImage}
-              setPreviewImage={setPreviewImage}
-            />
+            <NavDragaForm item={item} />
           )
         );
       })}
-      <div className={'absolute -left-full'}>
-        <NavDragStampMaker setState={setPreviewImage} />
-        <DragaInputText setState={setPreviewImage} />
-        <NavDragaCheckBox setState={setPreviewImage} />
-      </div>
+      <NavTestInput />
     </div>
   );
 };

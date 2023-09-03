@@ -9,6 +9,30 @@ import React, {
 import { DragPreviewImage, useDrag } from 'react-dnd';
 import html2canvas from 'html2canvas';
 
+const layerStyles = {
+  position: 'fixed',
+  pointerEvents: 'none',
+  zIndex: 100,
+  left: 0,
+  top: 0,
+};
+
+function getItemStyles(currentOffset) {
+  if (!currentOffset) {
+    return {
+      display: 'none',
+    };
+  }
+
+  const { x, y } = currentOffset;
+  const transform = `translate(${x}px, ${y}px)`;
+
+  return {
+    transform,
+    WebkitTransform: transform,
+  };
+}
+
 const NavDragaInputText = ({ setState }) => {
   const ref = useRef(null);
   const [imageSrc, setImageSrc] = useState('');
