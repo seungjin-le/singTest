@@ -83,7 +83,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       // 콘텐츠의 높이를 반환.
       return contentHeight;
     },
-    [item.offset, inputValue]
+    [item.offset, item.fontSet, inputValue]
   );
   // textarea의 콘텐츠 너비를 반환하는 함수.
   const getContentWidth = useCallback(
@@ -105,65 +105,68 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       // 콘텐츠의 너비를 반환.
       return contentWidth;
     },
-    [item.offset, inputValue]
+    [item.offset, item.fontSet, inputValue]
   );
 
-  const handleReSizing = (mouseDownEvent) => {
-    mouseDownEvent.stopPropagation();
-    setShowPosLine(true);
-    const getTextAreaHeight = getContentHeight(inputRef?.current);
-    const getTextAreaWidth = getContentWidth(inputRef?.current);
-    let changeSize = {};
-    const startPosition = {
-      x: mouseDownEvent.pageX,
-      y: mouseDownEvent.pageY,
-    };
+  const handleReSizing = useCallback(
+    (mouseDownEvent) => {
+      mouseDownEvent.stopPropagation();
+      setShowPosLine(true);
+      const getTextAreaHeight = getContentHeight(inputRef?.current);
+      const getTextAreaWidth = getContentWidth(inputRef?.current);
+      let changeSize = {};
+      const startPosition = {
+        x: mouseDownEvent.pageX,
+        y: mouseDownEvent.pageY,
+      };
 
-    const onMouseMove = (mouseMoveEvent) => {
-      const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
-      const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
-      if (!inputRef?.current) return;
+      const onMouseMove = (mouseMoveEvent) => {
+        const newX = size.x - startPosition.x + mouseMoveEvent.pageX;
+        const newY = size.y - startPosition.y + mouseMoveEvent.pageY;
+        if (!inputRef?.current) return;
 
-      const newWidth = Math.max(
-        newX <= getTextAreaWidth ? getTextAreaWidth : newX,
-        10
-      );
-      const newHeight = Math.max(
-        newY <= getTextAreaHeight ? getTextAreaHeight : newY,
-        20
-      );
-      console.log(newX, getTextAreaWidth);
-      setSize({ x: newWidth, y: newHeight });
-    };
-
-    const onMouseUp = () => {
-      setShowPosLine(false);
-
-      setState((prev) => {
-        return prev.map((data) =>
-          data.id === item.id
-            ? {
-                ...data,
-                offset: {
-                  ...data.offset,
-                  width: changeSize.x,
-                  height: changeSize.y,
-                },
-              }
-            : data
+        const newWidth = Math.max(
+          newX <= getTextAreaWidth ? getTextAreaWidth : newX,
+          10
         );
-      });
-      document.body.removeEventListener('mousemove', onMouseMove);
-    };
+        const newHeight = Math.max(
+          newY <= getTextAreaHeight ? getTextAreaHeight : newY,
+          20
+        );
+        setSize({ x: newWidth, y: newHeight });
+      };
 
-    document.body.addEventListener('mousemove', onMouseMove);
-    document.body.addEventListener('mouseup', onMouseUp, { once: true });
-  };
+      const onMouseUp = () => {
+        setShowPosLine(false);
 
+        setState((prev) => {
+          return prev.map((data) =>
+            data.id === item.id
+              ? {
+                  ...data,
+                  offset: {
+                    ...data.offset,
+                    width: changeSize.x,
+                    height: changeSize.y,
+                  },
+                }
+              : data
+          );
+        });
+        document.body.removeEventListener('mousemove', onMouseMove);
+      };
+
+      document.body.addEventListener('mousemove', onMouseMove);
+      document.body.addEventListener('mouseup', onMouseUp, { once: true });
+      setInputFocus(false);
+    },
+    [size]
+  );
+
+  // TextArea Value OnChange
   const handleTextAreaOnChange = ({ target }) => {
     const scrollHeight = target.scrollHeight;
     const { value } = target;
-
     // textarea가 꽉 찼을 때 더 이상 입력하지 못하게 막기.
     if (scrollHeight > size.y || showPosLine) return;
     setInputFocus(true);
@@ -186,6 +189,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     },
     [item, inputValue, inputFocus]
   );
+
   return (
     <Fragment>
       <Draggable
@@ -198,7 +202,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
         defaultClassName={'z-10'}>
         <div
           ref={nodeRef}
-          className="box box-border p-[1px] rounded-[5px] flex items-center justify-center"
+          className="box box-border p-[1px] rounded-[5px] flex items-center justify-center textAreaInput"
           style={{
             opacity: Opacity ? '0.6' : '1',
             ...style,
@@ -207,12 +211,16 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
             minWidth: size.x,
             maxHeight: size.y,
           }}
+          onBlur={(e) => {
+            console.log(e.relatedTarget);
+            if (e.relatedTarget && e.relatedTarget.closest('body')) return;
+            handlerTextAreaOnBlur(e);
+          }}
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}>
           <TextArea
             ref={inputRef}
             disabled={mode}
-            onBlur={handlerTextAreaOnBlur}
             value={inputValue}
             onChange={handleTextAreaOnChange}
             onFocus={() => {
@@ -254,7 +262,6 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
     </Fragment>
   );
 };
-
 export default memo(DragTextArea);
 
 const TextArea = styled.textarea`

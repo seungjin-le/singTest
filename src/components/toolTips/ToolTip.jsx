@@ -27,8 +27,8 @@ const ToolTip = ({ item, onChange }) => {
       className={
         'bg-[gray] w-[250px] absolute top-0 left-1/2 translate-x-m50 translate-y-m100 z-5 border-2 border-red-600 rounded-md'
       }
-      onMouseDown={(e) => e.stopPropagation()}>
-      <div className={'flex flex-row justify-start items-center'}>
+      onMouseDown={(e) => e.preventDefault()}>
+      <div className={'flex flex-row justify-start items-center w-full]'}>
         <div className={'w-auto p-3 whitespace-nowrap'}>폰트 크기</div>
         <div className={'w-full flex flex-row justify-center items-center '}>
           <select
@@ -42,7 +42,7 @@ const ToolTip = ({ item, onChange }) => {
           </select>
         </div>
       </div>
-      <div className={'flex flex-row justify-start items-center'}>
+      <div className={'flex flex-row justify-start items-center w-full'}>
         <div className={'w-auto p-3 whitespace-nowrap'}>정렬</div>
         <div
           className={'w-full flex flex-row justify-between items-center px-4'}>
