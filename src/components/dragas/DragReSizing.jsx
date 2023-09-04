@@ -12,6 +12,7 @@ const DragReSizing = ({ reSizing, onDelete, item }) => {
       <button
         onClick={(e) => {
           e.stopPropagation();
+
           onDelete(item?.id);
         }}
         className={

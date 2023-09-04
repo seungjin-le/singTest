@@ -1,29 +1,30 @@
-import React, { Fragment, useCallback, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 
 import Draggable from 'react-draggable';
 import styled from 'styled-components';
 import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
 import DragReSizing from './DragReSizing';
 
-const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
+const DragCheckBox = ({ item, setState, style, onDelete, mode }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
-  const [checked, setChecked] = useState(!!item.value);
+  const [checkBoxFocus, setCheckBoxFocus] = useState(false);
+  const [showPosLine, setShowPosLine] = useState(false);
   const [position, setPosition] = useState(item.offset.position);
   const [size, setSize] = useState({
     x: item.offset.width,
     y: item.offset.height,
   });
-  const [Opacity, setOpacity] = useState(false);
 
   const trackPos = (data) => {
     setPosition({ x: data.x, y: data.y });
+    setShowPosLine(true);
+    setCheckBoxFocus(false);
   };
-  const handleStart = () => {
-    setOpacity(true);
-  };
+
+  const handleStart = () => {};
   const handleEnd = () => {
-    setOpacity(false);
+    setShowPosLine(false);
     setState((prev) => {
       return prev.map((data) =>
         data.id === item.id
@@ -37,23 +38,23 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
   };
 
   const handlerReSizing = (mouseDownEvent) => {
-    mouseDownEvent.stopPropagation(); // 추가: 상위 요소로의 이벤트 전파를 중지합니다.
+    mouseDownEvent.stopPropagation(); // 상위 요소의 드레그 이벤트 전파를 중지.
     let changeSize = {};
+    setShowPosLine(true);
     const startSize = size;
     const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
     const onMouseMove = (mouseMoveEvent) => {
-      mouseMoveEvent.preventDefault();
-
       const deltaX = mouseMoveEvent.pageX - startPosition.x;
       const deltaY = mouseMoveEvent.pageY - startPosition.y;
 
       const maxDelta = Math.max(Math.abs(deltaX), Math.abs(deltaY));
       const directionX = deltaX >= 0 ? 1 : -1;
       const newSize = startSize.x + directionX * maxDelta;
-      changeSize = { x: Math.max(newSize, 25), y: Math.max(newSize, 25) };
+      changeSize = { x: Math.max(newSize, 10), y: Math.max(newSize, 10) };
 
       setSize(changeSize);
     };
+
     const onMouseUp = () => {
       setState((prev) => {
         return prev.map((data) =>
@@ -69,28 +70,27 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
             : data
         );
       });
+
+      setShowPosLine(false);
       document.body.removeEventListener('mousemove', onMouseMove);
     };
 
     document.body.addEventListener('mousemove', onMouseMove);
     document.body.addEventListener('mouseup', onMouseUp, { once: true });
   };
-  const handleOnChecked = useCallback(
-    ({ target: { checked } }) => {
-      setChecked(checked);
-      setState((prev) => {
-        return prev.map((data) =>
-          data.id === item.id
-            ? {
-                ...data,
-                value: checked,
-              }
-            : data
-        );
-      });
-    },
-    [checked]
-  );
+
+  const handleOnChecked = useCallback(() => {
+    setState((prev) => {
+      return prev.map((data) =>
+        data.id === item.id
+          ? {
+              ...data,
+              value: !data.value,
+            }
+          : data
+      );
+    });
+  }, []);
   return (
     <Fragment>
       <Draggable
@@ -105,7 +105,6 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
         <div
           ref={nodeRef}
           style={{
-            opacity: Opacity ? '0.6' : '1',
             ...style,
             width: size.x,
             height: size.y,
@@ -114,10 +113,13 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
           onMouseOut={() => setMouseOver(false)}>
           <CustomCheckbox
             type="checkbox"
-            className={'min-h-[25px] min-w-[25px]'}
-            checked={checked}
-            onChange={handleOnChecked}
+            checked={item.value}
+            onChange={() => checkBoxFocus && handleOnChecked()}
+            onClick={() => setCheckBoxFocus(true)}
+            onBlur={() => setCheckBoxFocus(false)}
+            $foucs={checkBoxFocus}
             style={{
+              opacity: showPosLine ? '0.6' : '1',
               width: size.x,
               height: size.y,
             }}
@@ -131,7 +133,7 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
           )}
         </div>
       </Draggable>
-      {!mode && (
+      {!mode && showPosLine && (
         <DefaultPositionLine
           item={item}
           disable={mouseOver}
@@ -143,9 +145,42 @@ const DragCheckBox = ({ item, setState, onChange, style, onDelete, mode }) => {
   );
 };
 
-export default DragCheckBox;
+export default memo(DragCheckBox);
+
 const CustomCheckbox = styled.input`
   margin: 0;
-  border: 0;
+  border: none;
   box-sizing: border-box;
+  box-shadow: ${({ $foucs }) => ($foucs ? '0 0 20px cornflowerblue' : 'none')};
+  position: relative;
+  outline: none;
+  &[type='checkbox'] {
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  &[type='checkbox']::after {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    content: 'OFF';
+    position: absolute;
+    top: 0;
+    visibility: visible;
+    height: 100%;
+    width: 100%;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  &[type='checkbox']:checked:after {
+    content: 'ON';
+    background: rgba(0, 0, 0, 0.5);
+  }
 `;

@@ -27,14 +27,17 @@ const adminItems = [
   {
     children: <AddIcon className={'mr-2'} />,
     text: '텍스트 입력하기',
+    type: 'textArea',
   },
   {
     children: <AddIcon className={'mr-2'} />,
     text: '체크박스 입력하기',
+    type: 'checkBox',
   },
   {
     children: <AddIcon className={'mr-2'} />,
     text: '이미지 입력하기',
+    type: 'Image',
   },
 ];
 
@@ -43,22 +46,18 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
   const textAreaRef = useRef(null);
   const stampRef = useRef(null);
   const checkBoxRef = useRef(null);
+  const imageRef = useRef(null);
 
   useEffect(() => {
     setType(item.type === 'admin');
   }, [item]);
 
-  const [{ textAreaDragging }, textAreaDrag, textAreaPreview] = useDrag({
+  const [{ textAreaDragging }, textAreaDrag] = useDrag({
     type: 'TEXTAREA',
     collect: (monitor) => {
       return {
         textAreaDragging: monitor.isDragging(),
       };
-    },
-    previewOptions: {
-      anchorX: 0.5,
-      anchorY: 0.5,
-      captureDraggingState: true,
     },
     item: (monitor) => {
       const rect = textAreaRef.current.getBoundingClientRect();
@@ -66,6 +65,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
         id: `textArea-`,
         type: 'textArea',
         info: {
+          type: item.type,
           name: item.name,
           email: item.email,
         },
@@ -104,10 +104,12 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
     },
     item: (monitor) => {
       const rect = checkBoxRef.current.getBoundingClientRect();
+
       return {
         id: `checkBox-`,
         type: 'checkBox',
         info: {
+          type: item.type,
           name: item.name,
           email: item.email,
         },
@@ -123,11 +125,11 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
           width: 25,
           height: 25,
         },
-        value: '',
+        value: false,
       };
     },
   });
-  const [{ stampDragging }, drag] = useDrag({
+  const [{ stampDragging }, stampDrag] = useDrag({
     type: 'DIV',
     collect: (monitor) => {
       return {
@@ -141,6 +143,7 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
         id: `stampMaker-`,
         type: 'stampMaker',
         info: {
+          type: item.type,
           name: item?.name,
           email: item?.email,
         },
@@ -162,8 +165,43 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
     },
   });
 
+  const [{ imageDragging }, imageDrag] = useDrag({
+    type: 'INPUTIMAGE',
+    collect: (monitor) => {
+      return {
+        imageDragging: monitor.isDragging(),
+      };
+    },
+    item: (monitor) => {
+      const rect = imageRef.current.getBoundingClientRect();
+
+      return {
+        id: `inputImage-`,
+        type: 'inputImage',
+        info: {
+          type: item.type,
+          name: item?.name,
+          email: item?.email,
+        },
+        offset: {
+          defaultPosition: {
+            x: monitor.getClientOffset().x - rect.left,
+            y: monitor.getClientOffset().y - rect.top,
+          },
+          position: {
+            x: 0,
+            y: 0,
+          },
+          value: '',
+          width: 200,
+          height: 100,
+        },
+      };
+    },
+  });
+
   const stampCombinedRef = (node) => {
-    drag(node);
+    stampDrag(node);
     stampRef.current = node;
   };
 
@@ -175,7 +213,10 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
     checkBoxDrag(node);
     checkBoxRef.current = node;
   };
-
+  const imageCombinedRef = (node) => {
+    imageDrag(node);
+    imageRef.current = node;
+  };
   const user = ({ children, text, type }, index) => {
     return (
       <ItemBox
@@ -188,7 +229,9 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
             ? textAreaCombinedRef
             : type === 'checkBox'
             ? checkBoxCombinedRef
-            : stampCombinedRef
+            : type === 'stamp'
+            ? stampCombinedRef
+            : imageCombinedRef
         }>
         {children} {text}
       </ItemBox>
@@ -201,7 +244,8 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
     if (checkBoxRef?.current && checkBoxDragging)
       checkBoxRef.current.style.opacity = 1;
     if (stampRef?.current && stampDragging) stampRef.current.style.opacity = 1;
-  }, [textAreaDragging, checkBoxDragging, stampDragging]);
+    if (imageRef?.current && imageDragging) imageRef.current.style.opacity = 1;
+  }, [textAreaDragging, checkBoxDragging, stampDragging, imageDragging]);
 
   return (
     <div

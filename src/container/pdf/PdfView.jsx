@@ -64,9 +64,7 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
   };
 
   useEffect(() => {
-    if (components.length === numPages) {
-      onDown();
-    }
+    if (components.length === numPages) onDown();
   }, [components]);
 
   return (
@@ -74,7 +72,7 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
       id="pdf-container"
       ref={containerRef}
       className={
-        'w-full h-auto flex justify-center flex-col items-center p-4 z-0'
+        'w-full h-auto flex justify-center flex-col items-center py-4 z-0'
       }>
       <button onClick={downloadPdf}>Download PDF</button>
       <div className={'h-full w-full'} ref={combinedRef}>
@@ -121,7 +119,7 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
               </div>
               <Pagination
                 key={`pagination_${currentPage}`}
-                count={numPages}
+                count={+numPages}
                 page={currentPage}
                 onChange={onChangePage}
               />

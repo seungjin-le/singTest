@@ -33,7 +33,7 @@ function getItemStyles(initialOffset, currentOffset, item) {
   };
 }
 
-const NavTestInput = () => {
+const NavDragItems = () => {
   const { itemType, isDragging, currentOffset, initialOffset, item } =
     useDragLayer((monitor) => ({
       item: monitor.getItem(),
@@ -50,11 +50,20 @@ const NavTestInput = () => {
       case 'DIV':
         return (
           <RadioButtonCheckedIcon
-            sx={{ color: 'gray', fontSize: 50, marginRight: 0 }}
+            sx={{ color: 'black', fontSize: 50, marginRight: 0 }}
           />
         );
       case 'CHECKBOX':
         return <CheckBox type={'checkbox'} />;
+      case 'INPUTIMAGE':
+        return (
+          <InputImage>
+            <label className="picture" htmlFor="picture__input" tabIndex="0">
+              <span className="picture__image"></span>
+            </label>
+            <input type="file" name="picture__input" id="picture__input" />
+          </InputImage>
+        );
       default:
         return null;
     }
@@ -71,10 +80,11 @@ const NavTestInput = () => {
   );
 };
 
-export default NavTestInput;
+export default NavDragItems;
 
 const TextArea = styled.textarea`
   resize: none;
+  width: 200px;
   white-space: pre-wrap;
   overflow: hidden;
   overflow-wrap: break-word;
@@ -95,4 +105,51 @@ const TextArea = styled.textarea`
 const CheckBox = styled.input`
   width: 25px;
   height: 25px;
+`;
+
+const InputImage = styled.span`
+  width: 200px;
+  height: 100px;
+  #picture__input {
+    display: none;
+  }
+
+  .picture {
+    width: 200px;
+    aspect-ratio: 16/9;
+    background: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    border: 2px dashed currentcolor;
+    cursor: pointer;
+    font-family: sans-serif;
+    transition:
+      color 300ms ease-in-out,
+      background 300ms ease-in-out;
+    outline: none;
+    overflow: hidden;
+  }
+
+  .picture:hover {
+    color: #777;
+    background: #ccc;
+  }
+
+  .picture:active {
+    border-color: turquoise;
+    color: turquoise;
+    background: #eee;
+  }
+
+  .picture:focus {
+    color: #777;
+    background: #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .picture__img {
+    max-width: 100%;
+  }
 `;

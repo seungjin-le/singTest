@@ -10,7 +10,7 @@ const DragStampMaker = ({ item, setState, style, onDelete, mode }) => {
   const [mouseOver, setMouseOver] = useState(false);
   const [position, setPosition] = useState(item.offset.position);
   const [size, setSize] = useState({
-    x: item.offset.width || 200,
+    x: item.offset.width || 50,
     y: item.offset.height || 50,
   });
 
@@ -116,10 +116,12 @@ const DragStampMaker = ({ item, setState, style, onDelete, mode }) => {
                   placement={'top'}
                   sx={{ zIndex: 0 }}
                   //children={<Fragment></Fragment>}
-                />
+                >
+                  <span> </span>
+                </Tooltip>
               </span>
               <RadioButtonCheckedIcon
-                sx={{ color: 'gray', fontSize: size.x, marginRight: 0 }}
+                sx={{ color: 'black', fontSize: size.x, marginRight: 0 }}
               />
             </Fragment>
           )}

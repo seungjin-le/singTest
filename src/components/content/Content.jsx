@@ -1,12 +1,12 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
 import DragTextArea from '../dragas/DragTextArea';
 import DragCheckBox from '../dragas/DragCheckBox';
 import PdfView from '../../container/pdf/PdfView';
-import DragStamp from '../dragas/DragStamp';
 import { Button } from '@mui/material';
 import DragStampMaker from '../dragas/DragStampMaker';
+import DragImageInput from '../dragas/DragImageInput';
 
 const TestData = [
   {
@@ -220,22 +220,29 @@ const TestData = [
   },
 ];
 
-const Content = ({ params, stamp }) => {
+const Content = ({ params }) => {
   const dropRef = useRef(null);
   const [mode, setMode] = useState(false);
   const [droppedItems, setDroppedItems] = useState([]);
   const [scale, setScale] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const handleOnClickDelete = useCallback(
-    (id) => {
-      setDroppedItems((prevItems) =>
-        prevItems
-          .filter((item) => item.id !== id)
-          .map((item, index) => ({ ...item, id: `${item.type}-${index}` }))
-      );
-    },
-    [droppedItems]
-  );
+
+  // Dragging Component Delete
+  const handleOnClickDelete = useCallback((id) => {
+    setDroppedItems((items) =>
+      items
+        .filter((item) => item.id !== id)
+        .map((item, index) => ({
+          ...item,
+          id: `${item.type}-${index}`,
+          value: item.value,
+          offset: {
+            ...item.offset,
+            position: { x: 0, y: 0 },
+          },
+        }))
+    );
+  }, []);
 
   const handleOnChangeTooltip = useCallback(
     ({ target: { value } }, id, type) => {
@@ -264,35 +271,29 @@ const Content = ({ params, stamp }) => {
     },
     [droppedItems]
   );
-  useEffect(() => {
-    if (stamp) {
-      setDroppedItems((prev) =>
-        prev.map((item) => {
-          if (item.type === 'stampMaker' && item.info.name === params?.name) {
-            return {
-              ...item,
-              value: stamp,
-            };
-          } else {
-            return item;
-          }
-        })
-      );
-    }
-  }, [stamp]);
+
   const [, drop] = useDrop(
     {
-      accept: ['TEXTAREA', 'CHECKBOX', 'DIV', 'STAMP'],
+      accept: ['TEXTAREA', 'CHECKBOX', 'DIV', 'STAMP', 'INPUTIMAGE'],
       drop: (item, monitor) => {
         const clientOffset = monitor.getClientOffset();
-
         const dropTargetRect = dropRef.current.getBoundingClientRect();
-        const { scrollX, scrollY } = window;
-        const { top, left } = dropTargetRect;
 
-        const x = clientOffset.x - left - scrollX - item.offset.width / 2;
-        const y = clientOffset.y - top - scrollY - item.offset.height / 2;
+        const screenLog = document.querySelector('#signNavLayout');
+        const pdfContainer = document.querySelector('#pdf-container');
+        const pdfViewPage = document.querySelector('.react-pdf__Page');
+
+        const { top } = dropTargetRect;
+        const x =
+          clientOffset.x -
+          screenLog.offsetWidth -
+          (pdfContainer.offsetWidth - pdfViewPage.offsetWidth) / 2 -
+          (item.type === 'stampMaker' ? 25 : 1);
+        const y =
+          clientOffset.y - (item.type === 'stampMaker' ? top + 25 : top);
+
         const check = droppedItems.findIndex(({ id }, index) => item.id === id);
+
         if (check === -1) {
           setDroppedItems((prev) => [
             ...prev,
@@ -302,7 +303,15 @@ const Content = ({ params, stamp }) => {
               page: currentPage,
               offset: {
                 ...item.offset,
-                defaultPosition: { x: x, y: y },
+                defaultPosition: {
+                  x:
+                    x < 0
+                      ? 0
+                      : x > pdfViewPage.offsetWidth
+                      ? pdfViewPage.offsetWidth - item.offset.width
+                      : x,
+                  y: y,
+                },
                 position: { x: 0, y: 0 },
               },
               fontSet: {
@@ -318,11 +327,11 @@ const Content = ({ params, stamp }) => {
     },
     [droppedItems, currentPage]
   );
-  const combinedRef = (node) => {
+  const combinedRef = useCallback((node) => {
     drop(node);
     dropRef.current = node;
-  };
-
+  }, []);
+  console.log(droppedItems);
   return (
     <div
       className={
@@ -384,9 +393,9 @@ const Content = ({ params, stamp }) => {
                     mode={mode}
                   />
                 );
-              case 'stamp':
+              case 'stampMaker':
                 return (
-                  <DragStamp
+                  <DragStampMaker
                     key={index}
                     style={style}
                     onDelete={handleOnClickDelete}
@@ -395,9 +404,9 @@ const Content = ({ params, stamp }) => {
                     mode={mode}
                   />
                 );
-              case 'stampMaker':
+              case 'inputImage':
                 return (
-                  <DragStampMaker
+                  <DragImageInput
                     key={index}
                     style={style}
                     onDelete={handleOnClickDelete}

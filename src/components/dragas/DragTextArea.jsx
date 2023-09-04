@@ -83,7 +83,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
           : data
       );
     });
-  }, [item, position, setState]);
+  }, [item, position, setState, size]);
 
   // textarea의 내용 높이를 반환하는 함수.
   const getContentHeight = useCallback(
@@ -167,7 +167,9 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       // 드래그 종료 시 사이즈 저장
       const onMouseUp = () => {
         setShowPosLine(false);
-        updateSize(changeSize.x, changeSize.y);
+
+        if (changeSize.x && changeSize.y)
+          updateSize(changeSize.x, changeSize.y);
 
         document.body.removeEventListener('mousemove', onMouseMove);
       };
