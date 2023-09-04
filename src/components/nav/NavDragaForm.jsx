@@ -78,7 +78,6 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
             x: 0,
             y: 0,
           },
-          value: '',
           width: 200,
           height: 50,
           fontSet: {

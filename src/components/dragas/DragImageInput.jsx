@@ -7,7 +7,8 @@ import styled from 'styled-components';
 const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
-  const [checkBoxFocus, setCheckBoxFocus] = useState(false);
+  const imageInputRef = useRef(null);
+  const [moveImageInput, setMoveImageInput] = useState({ x: 0, y: 0 });
   const [showPosLine, setShowPosLine] = useState(false);
   const [position, setPosition] = useState(item.offset.position);
   const [size, setSize] = useState({
@@ -15,62 +16,78 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
     y: item.offset.height,
   });
 
-  const trackPos = (data) => {
-    setPosition({ x: data.x, y: data.y });
-    setShowPosLine(true);
-    setCheckBoxFocus(false);
-  };
+  const trackPos = useCallback(
+    (data) => {
+      setPosition({ x: data.x, y: data.y });
+      setShowPosLine(true);
 
-  const handleStart = () => {};
-  const handleEnd = () => {
-    setShowPosLine(false);
-    setState((prev) => {
-      return prev.map((data) =>
-        data.id === item.id
-          ? {
-              ...data,
-              offset: { ...data.offset, position: position },
-            }
-          : data
-      );
-    });
-  };
+      if (!item.value) imageInputRef.current.disabled = true;
+    },
+    [item]
+  );
 
-  const handlerReSizing = (mouseDownEvent) => {
-    mouseDownEvent.stopPropagation(); // 상위 요소의 드레그 이벤트 전파를 중지.
-    let changeSize = {};
-    setShowPosLine(true);
-    const startSize = size;
-    const startPosition = { x: mouseDownEvent.pageX, y: mouseDownEvent.pageY };
-    const onMouseMove = (mouseMoveEvent) => {
-      const deltaX = mouseMoveEvent.pageX - startPosition.x;
-      const deltaY = mouseMoveEvent.pageY - startPosition.y;
+  const handleStart = useCallback(
+    ({ pageX, pageY }) => {
+      setMoveImageInput({ x: pageX, y: pageY });
+    },
+    [moveImageInput]
+  );
 
-      const maxDelta = Math.max(Math.abs(deltaX), Math.abs(deltaY));
-      const directionX = deltaX >= 0 ? 1 : -1;
-      const newSize = startSize.x + directionX * maxDelta;
-      changeSize = { x: Math.max(newSize, 10), y: Math.max(newSize, 10) };
+  const handleEnd = useCallback(
+    ({ clientX, clientY }) => {
+      setShowPosLine(false);
+      const { x, y } = moveImageInput;
+      console.log(x, y, clientX, clientY);
+      if (clientX === x && clientY === y && !item.value)
+        return (imageInputRef.current.disabled = false);
 
-      setSize(changeSize);
-    };
-
-    const onMouseUp = () => {
       setState((prev) => {
         return prev.map((data) =>
           data.id === item.id
             ? {
                 ...data,
-                offset: {
-                  ...data.offset,
-                  width: changeSize.x,
-                  height: changeSize.y,
-                },
+                offset: { ...data.offset, position: position },
               }
             : data
         );
       });
+    },
+    [position, moveImageInput]
+  );
 
+  const handlerReSizing = (mouseDownEvent) => {
+    // Component의 사이즈 조절중 드레그 막기
+    mouseDownEvent.stopPropagation();
+    // 사이즈 조정중 표시할 X축 Y축 선 보이기
+    setShowPosLine(true);
+    // textarea 내용의 높이와 너비를 저장
+
+    let changeSize = {};
+
+    // 드래그 시작 위치 저장
+    const startPosition = {
+      x: mouseDownEvent.pageX,
+      y: mouseDownEvent.pageY,
+    };
+
+    // 드래그 중 마우스 움직임에 따라 사이즈 조정
+    const onMouseMove = ({ pageX, pageY }) => {
+      const newX = size.x - startPosition.x + pageX;
+      const newY = size.y - startPosition.y + pageY;
+
+      changeSize = {
+        x: Math.max(newX, 25),
+        y: Math.max(newY, 25),
+      };
+      setSize(changeSize);
+    };
+
+    // 드래그 종료 시 사이즈 저장
+    const onMouseUp = () => {
       setShowPosLine(false);
+
+      if (changeSize.x && changeSize.y) setSize(changeSize);
+
       document.body.removeEventListener('mousemove', onMouseMove);
     };
 
@@ -78,24 +95,30 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
     document.body.addEventListener('mouseup', onMouseUp, { once: true });
   };
 
-  const handleOnAddImage = useCallback(({ target: { value } }) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      $('#blah').attr('src', e.target.result).width(150).height(200);
-    };
-    reader.readAsDataURL(value.files[0]);
-    // setState((prev) => {
-    //   return prev.map((data) =>
-    //     data.id === item.id
-    //       ? {
-    //           ...data,
-    //           value: value,
-    //         }
-    //       : data
-    //   );
-    // });
-  }, []);
-  console.log(item);
+  const handleOnAddImage = useCallback(
+    ({ target: { files } }) => {
+      const file = files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ({ target: { result } }) => {
+          setState((prev) => {
+            return prev.map((data) =>
+              data.id === item.id
+                ? {
+                    ...data,
+                    value: result,
+                  }
+                : data
+            );
+          });
+        };
+
+        reader.readAsDataURL(file);
+      }
+    },
+    [item.value]
+  );
+
   return (
     <Fragment>
       <Draggable
@@ -117,16 +140,35 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}>
           <InputImage
-            onClick={() => setCheckBoxFocus(true)}
-            onBlur={() => setCheckBoxFocus(false)}>
-            <label className="picture" htmlFor="picture__input" tabIndex="0">
-              <span className="picture__image">Add Image</span>
+            className={'w-full h-full'}
+            style={{
+              width: size.x,
+              height: size.y,
+            }}>
+            <label
+              className="picture w-full h-full"
+              htmlFor="picture__input"
+              tabIndex="0">
+              {item.value ? (
+                <img
+                  src={item.value}
+                  alt="Image"
+                  className={'h-full'}
+                  onDragStart={(e) => e.preventDefault()}
+                />
+              ) : (
+                <span className="picture__image">Add Image</span>
+              )}
             </label>
             <input
               type="file"
+              ref={imageInputRef}
               name="picture__input"
               id="picture__input"
-              onChange={handleOnAddImage}
+              className={'hidden select-none z-0'}
+              onChange={(e) => handleOnAddImage(e)}
+              onClick={() => {}}
+              disabled={item.value}
             />
           </InputImage>
           {mouseOver && !mode && (
@@ -152,13 +194,11 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
 
 export default DragImageInput;
 
-const InputImage = styled.span`
-  #picture__input {
-    display: none;
+const InputImage = styled.div`
+  & * {
+    user-select: none;
   }
-
   .picture {
-    aspect-ratio: 16/9;
     background: #ddd;
     display: flex;
     align-items: center;
