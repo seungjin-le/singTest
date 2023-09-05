@@ -118,11 +118,41 @@ const DragCheckBox = ({ item, setState, style, onDelete, mode }) => {
             onClick={() => setCheckBoxFocus(true)}
             onBlur={() => setCheckBoxFocus(false)}
             $foucs={checkBoxFocus}
+            $infoType={
+              item?.info.type === 'admin' && mode
+                ? 'rgba(255, 252, 127, 0)'
+                : item?.info.type === 'admin' && !mode
+                ? 'rgba(255, 255, 255, 0.7)'
+                : item?.info.type === 'user' && !mode
+                ? 'rgba(255, 252, 127, 0.7)'
+                : 'rgba(255, 255, 255, 0.7)'
+            }
+            $checked={
+              item?.info.type === 'admin' && mode
+                ? 'rgba(255, 252, 127, 0)'
+                : item?.info.type === 'admin' && !mode
+                ? 'rgba(255, 255, 255, 0.7)'
+                : item?.info.type === 'user' && !mode
+                ? 'rgba(255, 252, 127, 0.7)'
+                : 'rgba(255, 255, 255, 0.7)'
+            }
             style={{
               opacity: showPosLine ? '0.6' : '1',
               width: size.x,
               height: size.y,
             }}
+          />
+          <span
+            className={`absolute  left-[2px] ${
+              item?.info.type === 'admin' && !mode
+                ? 'z-[-100]'
+                : item?.info.type === 'admin' && mode
+                ? 'z-[100]'
+                : item?.info.type === 'user' && !mode
+                ? 'z-[100]'
+                : 'z-[-100]'
+            }`}
+            style={{ width: size.x - 4, height: size.y - 1 }}
           />
           {mouseOver && !mode && (
             <DragReSizing
@@ -156,7 +186,7 @@ const CustomCheckbox = styled.input`
   outline: none;
   &[type='checkbox'] {
     -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.7);
+    background: ${({ $infoType }) => $infoType};
     border: 1px solid #ccc;
     border-radius: 4px;
   }
@@ -174,13 +204,13 @@ const CustomCheckbox = styled.input`
     line-height: 30px;
     text-align: center;
     border-radius: 4px;
-    background: rgba(0, 0, 0, 0.1);
-    color: #fff;
+    background: ${({ $infoType }) => $infoType};
+    color: black;
     font-weight: 600;
     cursor: pointer;
   }
   &[type='checkbox']:checked:after {
     content: 'ON';
-    background: rgba(0, 0, 0, 0.5);
+    //background: rgba(0, 0, 0, 0.5);
   }
 `;

@@ -20,8 +20,6 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
     (data) => {
       setPosition({ x: data.x, y: data.y });
       setShowPosLine(true);
-
-      if (!item.value) imageInputRef.current.disabled = true;
     },
     [item]
   );
@@ -128,8 +126,7 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
         onStop={handleEnd}
         bounds={'parent'}
         disabled={mode}
-        position={position}
-        defaultClassName={'z-10'}>
+        position={position}>
         <div
           ref={nodeRef}
           style={{
@@ -165,10 +162,11 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
               ref={imageInputRef}
               name="picture__input"
               id="picture__input"
-              className={'hidden select-none z-0'}
+              className={'hidden select-none'}
               onChange={(e) => handleOnAddImage(e)}
-              onClick={() => {}}
-              disabled={item.value}
+              onClick={(e) => {
+                if (item.value) e.preventDefault();
+              }}
             />
           </InputImage>
           {mouseOver && !mode && (

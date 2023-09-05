@@ -79,13 +79,13 @@ const NavDragaForm = ({ item, previewImage, setPreviewImage }) => {
             y: 0,
           },
           width: 200,
-          height: 50,
-          fontSet: {
-            fontSize: '14px',
-            textAlign: 'left',
-            color: '#000000',
-            fontWeight: '400',
-          },
+          height: 18,
+        },
+        fontSet: {
+          fontSize: '12px',
+          textAlign: 'left',
+          color: '#000000',
+          fontWeight: '400',
         },
         value: '',
       };

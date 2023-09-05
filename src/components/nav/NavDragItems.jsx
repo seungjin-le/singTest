@@ -46,7 +46,7 @@ const NavDragItems = () => {
   const renderItem = () => {
     switch (itemType) {
       case 'TEXTAREA':
-        return <TextArea />;
+        return <TextArea $infoType={item?.info?.type === 'user'} />;
       case 'DIV':
         return (
           <RadioButtonCheckedIcon
@@ -59,7 +59,7 @@ const NavDragItems = () => {
         return (
           <InputImage>
             <label className="picture" htmlFor="picture__input" tabIndex="0">
-              <span className="picture__image"></span>
+              <span className="picture__image" />
             </label>
             <input type="file" name="picture__input" id="picture__input" />
           </InputImage>
@@ -70,7 +70,6 @@ const NavDragItems = () => {
   };
 
   if (!isDragging) return null;
-
   return (
     <div style={layerStyles}>
       <div style={getItemStyles(initialOffset, currentOffset, item)}>
@@ -85,6 +84,7 @@ export default NavDragItems;
 const TextArea = styled.textarea`
   resize: none;
   width: 200px;
+  height: 18px;
   white-space: pre-wrap;
   overflow: hidden;
   overflow-wrap: break-word;
@@ -93,7 +93,8 @@ const TextArea = styled.textarea`
   box-sizing: content-box;
   padding: 0;
   border: none;
-  background: rgba(255, 255, 255, 0.7);
+  background: ${({ $infoType }) =>
+    $infoType ? 'rgba(255, 252, 127, 0.7)' : 'rgba(255, 255, 255, 0.7)'};
   letter-spacing: 0;
   word-break: break-all;
   outline: 1px dashed black;

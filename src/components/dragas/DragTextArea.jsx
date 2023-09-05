@@ -125,7 +125,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       // 클론의 텍스트 콘텐츠를 textarea의 값으로 설정.
       clone.textContent = textArea.value;
       // 클론의 오프셋 너비를 저장. 이것이 콘텐츠의 너비.
-      const contentWidth = clone.offsetWidth + 4; // 4를 더하는 이유는 텍스트의 padding를 고려.
+      const contentWidth = clone.offsetWidth + 8; // 4를 더하는 이유는 텍스트의 padding를 고려.
       // 클론을 문서의 body에서 제거.
       document.body.removeChild(clone);
       // 콘텐츠의 너비를 반환.
@@ -145,21 +145,29 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       const getTextAreaHeight = getContentHeight(inputRef?.current);
       const getTextAreaWidth = getContentWidth(inputRef?.current);
       let changeSize = {};
-
+      let startSize = size;
       // 드래그 시작 위치 저장
       const startPosition = {
         x: mouseDownEvent.pageX,
         y: mouseDownEvent.pageY,
       };
 
+      const lineHeight = parseFloat(
+        getComputedStyle(inputRef.current).lineHeight
+      );
+
       // 드래그 중 마우스 움직임에 따라 사이즈 조정
       const onMouseMove = ({ pageX, pageY }) => {
         const newX = size.x - startPosition.x + pageX;
         const newY = size.y - startPosition.y + pageY;
+
         if (!inputRef?.current) return;
         changeSize = {
-          x: Math.max(newX <= getTextAreaWidth ? getTextAreaWidth : newX, 10),
-          y: Math.max(newY <= getTextAreaHeight ? getTextAreaHeight : newY, 15),
+          x: Math.max(newX <= getTextAreaWidth ? getTextAreaWidth : newX, 15),
+          y: Math.max(
+            newY <= getTextAreaHeight ? getTextAreaHeight : newY,
+            lineHeight
+          ), // 12px 기분 최저 높이
         };
         setSize(changeSize);
       };
@@ -167,9 +175,12 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       // 드래그 종료 시 사이즈 저장
       const onMouseUp = () => {
         setShowPosLine(false);
-
         if (changeSize.x && changeSize.y)
-          updateSize(changeSize.x, changeSize.y);
+          // textArea의 높이를 lineHeight에 맞춰서 조정
+          updateSize(
+            changeSize.x,
+            Math.round(changeSize.y / lineHeight) * lineHeight
+          );
 
         document.body.removeEventListener('mousemove', onMouseMove);
       };
@@ -223,7 +234,6 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       }
     }
   }, [item.fontSet]);
-
   return (
     <Fragment>
       <Draggable
@@ -231,9 +241,8 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
         onDrag={(e, data) => handleInputDrag(data)}
         onStop={handleEnd}
         bounds={'parent'}
-        disabled={inputFocus}
-        position={position}
-        defaultClassName={'z-10'}>
+        disabled={inputFocus || mode}
+        position={position}>
         <div
           ref={nodeRef}
           className="box box-border p-[1px] rounded-[5px] flex items-center justify-center textAreaInput"
@@ -253,8 +262,19 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
           onMouseOut={() => setMouseOver(false)}>
           <TextArea
             ref={inputRef}
-            disabled={mode}
+            $userInput={
+              item?.info.type === 'admin' && mode ? 'none' : '1px dashed black'
+            }
             value={inputValue}
+            $infoType={
+              item?.info.type === 'admin' && mode
+                ? 'rgba(255, 252, 127, 0)'
+                : item?.info.type === 'admin' && !mode
+                ? 'rgba(255, 255, 255, 0.7)'
+                : item?.info.type === 'user' && !mode
+                ? 'rgba(255, 252, 127, 0.7)'
+                : 'rgba(255, 255, 255, 0.7)'
+            }
             onChange={handleTextAreaOnChange}
             onFocus={() => {
               setMouseOver(true);
@@ -271,11 +291,27 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
               maxHeight: size.y,
             }}
           />
+          <span
+            className={`absolute  left-[2px] ${
+              item?.info.type === 'admin' && !mode
+                ? 'z-[-100]'
+                : item?.info.type === 'admin' && mode
+                ? 'z-[100]'
+                : item?.info.type === 'user' && !mode
+                ? 'z-[100]'
+                : 'z-[-100]'
+            }`}
+            style={{ width: size.x - 4, height: size.y - 1 }}
+          />
           {(mouseOver || inputFocus) && (
             <Fragment>
               <DragReSizing
-                reSizing={handleReSizing}
-                onDelete={onDelete}
+                reSizing={
+                  !mode
+                    ? handleReSizing
+                    : item?.info.type === 'user' && handleReSizing
+                }
+                onDelete={!mode && onDelete}
                 item={item}
               />
               {inputFocus && <ToolTip item={item} onChange={onChange} />}
@@ -305,12 +341,12 @@ const TextArea = styled.textarea`
   display: block;
   z-index: 10;
   box-sizing: content-box;
-  padding: 0;
+  padding: 0 2px;
   border: none;
-  background: rgba(255, 255, 255, 0.7);
+  background: ${({ $infoType }) => $infoType};
   letter-spacing: 0;
   word-break: break-all;
-  outline: 1px dashed black;
+  outline: ${({ $userInput }) => $userInput};
   &:focus {
     outline: none;
   }

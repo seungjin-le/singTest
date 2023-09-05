@@ -1,4 +1,10 @@
-import React, { Fragment, useCallback, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
 import styled from 'styled-components';
 import NavStamp from '../nav/NavStamp';
@@ -24,6 +30,7 @@ const StampTabs = ({ name, setStamps }) => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
   const getDisplayName = (name) => {
     const format = name.slice(0, 3).split('');
     return format.length > 2 ? format : defaultName;
@@ -33,29 +40,35 @@ const StampTabs = ({ name, setStamps }) => {
     <div
       id={id}
       onClick={onClick}
-      className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer`}>
-      <span className={`${className}`}>{format}</span>
+      className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer text-center leading-none `}>
+      <span className={`${className} `}>{format}</span>
     </div>
   );
   const shape = (type) => {
     return type === 0
       ? 'rounded-[40px/100px] flex-col p-1'
       : type === 1
-      ? 'rounded-full flex-row flex-wrap items-center justify-center flex-1 max-w-[80px] min-h-[80px] p-2 pb-3 pt-1'
-      : 'rounded-[0] flex-row flex-wrap items-center justify-center  flex-1 max-w-[70px] min-h-[70px] p-1 pb-2 pt-0';
+      ? 'rounded-full flex-row flex-wrap items-center justify-center flex-1 max-w-[80px] min-h-[80px] p-2 '
+      : 'rounded-[0] flex-row flex-wrap items-center justify-center  flex-1 max-w-[70px] min-h-[70px] p-1  ';
   };
   const handleCanvasEnd = () => {
     setSignImage(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
     setStamps(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
   };
   const handleOnClickStamp = async (id) => {
+    console.log(id);
     const stamp = document.getElementById(id);
-    const canvas = await html2canvas(stamp, {
+    console.log(stamp);
+    await html2canvas(stamp, {
       backgroundColor: null,
-    });
-    const imgData = canvas.toDataURL('image/png');
-    setStamps(imgData);
+    }).then((canvas) => setSignImage(canvas.toDataURL('image/jpg')));
+
+    //const imgData = canvas.toDataURL('image/jpg');
+    // console.log(imgData);
+    // setStamps(imgData);
+    //setSignImage(imgData);
   };
+
   return (
     <Box className={'w-full'}>
       <StyledTabs
@@ -69,14 +82,15 @@ const StampTabs = ({ name, setStamps }) => {
         <StyledTab disableRipple label="사인" />
       </StyledTabs>
       <div className={'text-center my-4 text-2xl'}>Font Family</div>
-      <Box className={'flex flex-row items-center flex-wrap h-auto w-full'}>
+      <StampBox
+        className={'flex flex-row items-center flex-wrap h-auto w-full'}>
         {value !== 3 ? (
           fonts.map((font) => {
             return (
               <StampShape
                 key={font}
                 id={font}
-                className={`border-4 font-bold border-red-600 flex  text-center p-0  z-10 text-[red] text-3xl flex-1
+                className={`border-4 font-bold border-red-600 flex  text-center p-0  z-10 text-[red] text-[30px] flex-1
               ${shape(value)} `}
                 type={value}
                 onClick={() => handleOnClickStamp(font)}
@@ -119,19 +133,11 @@ const StampTabs = ({ name, setStamps }) => {
           </SignBox>
         )}
         <div className={'w-full flex flex-col items-center my-4'}>
-          <div className={'text-2xl my-4'}>Drag</div>
-          {value !== 3 ? (
-            <NavStamp
-              style={shape(value)}
-              type={value}
-              value={format}
-              font={selectedFont}
-            />
-          ) : (
-            <NavSignStamp type={value} value={signImage} />
-          )}
+          <div className={'text-2xl my-4'}>Stamp</div>
+
+          <img src={signImage} alt="" />
         </div>
-      </Box>
+      </StampBox>
     </Box>
   );
 };
@@ -170,5 +176,17 @@ const SignBox = styled.span`
   width: 100%;
   & > canvas {
     width: 100%;
+  }
+`;
+
+const StampBox = styled(Box)`
+  & > * {
+    line-height: 0 !important;
+  }
+  & span {
+    line-height: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 `;

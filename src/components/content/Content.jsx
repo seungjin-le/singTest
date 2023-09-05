@@ -293,7 +293,7 @@ const Content = ({ params }) => {
           clientOffset.y - (item.type === 'stampMaker' ? top + 25 : top);
 
         const check = droppedItems.findIndex(({ id }, index) => item.id === id);
-
+        console.log(item);
         if (check === -1) {
           setDroppedItems((prev) => [
             ...prev,
@@ -314,12 +314,6 @@ const Content = ({ params }) => {
                 },
                 position: { x: 0, y: 0 },
               },
-              fontSet: {
-                fontSize: '14px',
-                textAlign: 'left',
-                color: '#000000',
-                fontWeight: '400',
-              },
             },
           ]);
         }
@@ -331,7 +325,6 @@ const Content = ({ params }) => {
     drop(node);
     dropRef.current = node;
   }, []);
-  console.log(droppedItems);
   return (
     <div
       className={
