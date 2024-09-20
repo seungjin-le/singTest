@@ -11,8 +11,17 @@ import ToolTip from '../toolTips/ToolTip';
 import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
 import DragReSizing from './DragReSizing';
 import styled from 'styled-components';
+import TextToolTip from '../toolTips/TextToolTip';
 
-const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
+const DragTextArea = ({
+  item,
+  setState,
+  onChange,
+  style,
+  onDelete,
+  mode,
+  isDownloading,
+}) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const [showPosLine, setShowPosLine] = useState(false);
@@ -234,6 +243,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
       }
     }
   }, [item.fontSet]);
+
   return (
     <Fragment>
       <Draggable
@@ -241,11 +251,11 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
         onDrag={(e, data) => handleInputDrag(data)}
         onStop={handleEnd}
         bounds={'parent'}
-        disabled={inputFocus || mode}
+        disabled={inputFocus && mode}
         position={position}>
         <div
           ref={nodeRef}
-          className="box box-border p-[1px] rounded-[5px] flex items-center justify-center textAreaInput"
+          className="box box-border p-[1px] rounded-[5px] flex items-center justify-center textAreaInput z-[100]"
           style={{
             opacity: Opacity ? '0.6' : '1',
             ...style,
@@ -262,18 +272,10 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
           onMouseOut={() => setMouseOver(false)}>
           <TextArea
             ref={inputRef}
-            $userInput={
-              item?.info.type === 'admin' && mode ? 'none' : '1px dashed black'
-            }
+            $userInput={!isDownloading && '1px dashed black'}
             value={inputValue}
             $infoType={
-              item?.info.type === 'admin' && mode
-                ? 'rgba(255, 252, 127, 0)'
-                : item?.info.type === 'admin' && !mode
-                ? 'rgba(255, 255, 255, 0.7)'
-                : item?.info.type === 'user' && !mode
-                ? 'rgba(255, 252, 127, 0.7)'
-                : 'rgba(255, 255, 255, 0.7)'
+              mode ? 'rgba(255, 252, 127, 0)' : 'rgba(255, 252, 127, 0.7)'
             }
             onChange={handleTextAreaOnChange}
             onFocus={() => {
@@ -292,26 +294,16 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
             }}
           />
           <span
-            className={`absolute  left-[2px] ${
-              item?.info.type === 'admin' && !mode
-                ? 'z-[-100]'
-                : item?.info.type === 'admin' && mode
-                ? 'z-[100]'
-                : item?.info.type === 'user' && !mode
-                ? 'z-[100]'
-                : 'z-[-100]'
-            }`}
+            className={`absolute left-[2px] ${mode ? 'z-[-100]' : 'z-[100]'}`}
             style={{ width: size.x - 4, height: size.y - 1 }}
           />
-          {(mouseOver || inputFocus) && (
+
+          {!isDownloading && <TextToolTip item={item} description={'텍스트'} />}
+          {!isDownloading && (mouseOver || inputFocus) && (
             <Fragment>
               <DragReSizing
-                reSizing={
-                  !mode
-                    ? handleReSizing
-                    : item?.info.type === 'user' && handleReSizing
-                }
-                onDelete={!mode && onDelete}
+                reSizing={mode ? handleReSizing : null}
+                onDelete={mode && onDelete}
                 item={item}
               />
               {inputFocus && <ToolTip item={item} onChange={onChange} />}
@@ -320,7 +312,7 @@ const DragTextArea = ({ item, setState, onChange, style, onDelete, mode }) => {
         </div>
       </Draggable>
 
-      {showPosLine && (
+      {!isDownloading && showPosLine && (
         <DefaultPositionLine
           item={item}
           disable={mouseOver}
@@ -347,7 +339,4 @@ const TextArea = styled.textarea`
   letter-spacing: 0;
   word-break: break-all;
   outline: ${({ $userInput }) => $userInput};
-  &:focus {
-    outline: none;
-  }
 `;

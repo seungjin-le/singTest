@@ -1,10 +1,4 @@
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useRef, useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
 import styled from 'styled-components';
 import NavStamp from '../nav/NavStamp';
@@ -20,53 +14,41 @@ const fonts = [
   'Somi',
   'HakgyoansimButpenB',
 ];
-const defaultName = ['홍', '길', '동'];
 
 const StampTabs = ({ name, setStamps }) => {
   const [value, setValue] = useState(0);
-  const [selectedFont, setSelectedFont] = useState('');
   const canvasSign = useRef(null);
   const [signImage, setSignImage] = useState('');
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+  const handleChange = (event, newValue) => setValue(newValue);
 
-  const getDisplayName = (name) => {
-    const format = name.slice(0, 3).split('');
-    return format.length > 2 ? format : defaultName;
-  };
-  const format = getDisplayName(name);
-  const StampShape = ({ className, format, onClick, id }) => (
-    <div
-      id={id}
-      onClick={onClick}
-      className={`flex flex-col items-center justify-center  mb-2 mr-2 cursor-pointer text-center leading-none `}>
-      <span className={`${className} `}>{format}</span>
-    </div>
-  );
   const shape = (type) => {
     return type === 0
-      ? 'rounded-[40px/100px] flex-col p-1'
+      ? 'rounded-[55px/90px] p-1 w-[50px] h-[100px]'
       : type === 1
-      ? 'rounded-full flex-row flex-wrap items-center justify-center flex-1 max-w-[80px] min-h-[80px] p-2 '
-      : 'rounded-[0] flex-row flex-wrap items-center justify-center  flex-1 max-w-[70px] min-h-[70px] p-1  ';
+        ? 'rounded-full flex-wrap w-[80px] h-[80px] min-w-[80px] min-h-[80px] max-w-[80px] max-h-[80px]  grid-cols-2 p-[10px] !text-[24px]'
+        : 'rounded-0 flex-wrap flex-1 w-[80px] h-[80px] min-w-[80px] min-h-[80px] max-w-[80px] max-h-[80px] grid-cols-2 p-[10px] !text-[30px]';
   };
   const handleCanvasEnd = () => {
     setSignImage(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
     setStamps(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
   };
   const handleOnClickStamp = async (id) => {
-    console.log(id);
     const stamp = document.getElementById(id);
-    console.log(stamp);
+
     await html2canvas(stamp, {
       backgroundColor: null,
-    }).then((canvas) => setSignImage(canvas.toDataURL('image/jpg')));
+      scale: 0.95,
+    }).then((canvas) => setSignImage(canvas.toDataURL('image/png')));
+  };
 
-    //const imgData = canvas.toDataURL('image/jpg');
-    // console.log(imgData);
-    // setStamps(imgData);
-    //setSignImage(imgData);
+  const textFormat = (text) => {
+    return text.split('').map((char, index) => (
+      <div
+        className={'flex items-center justify-center w-full h-full'}
+        key={`${char}_${index}`}>
+        {char}
+      </div>
+    ));
   };
 
   return (
@@ -81,42 +63,23 @@ const StampTabs = ({ name, setStamps }) => {
         <StyledTab disableRipple label="사각형" />
         <StyledTab disableRipple label="사인" />
       </StyledTabs>
+
       <div className={'text-center my-4 text-2xl'}>Font Family</div>
       <StampBox
-        className={'flex flex-row items-center flex-wrap h-auto w-full'}>
+        className={
+          'flex flex-row items-center flex-wrap h-auto w-full gap-[10px]'
+        }>
         {value !== 3 ? (
           fonts.map((font) => {
             return (
-              <StampShape
+              <div
                 key={font}
                 id={font}
-                className={`border-4 font-bold border-red-600 flex  text-center p-0  z-10 text-[red] text-[30px] flex-1
-              ${shape(value)} `}
-                type={value}
-                onClick={() => handleOnClickStamp(font)}
-                format={
-                  <Fragment>
-                    {format.map((item, index) => (
-                      <span
-                        style={{ fontFamily: font }}
-                        key={index}
-                        className={`${
-                          (value !== 0 || value !== 3) &&
-                          'block w-[25px] h-[25px]'
-                        }`}>
-                        {item}
-                      </span>
-                    ))}
-                    {value !== 0 && value !== 3 && (
-                      <span
-                        style={{ fontFamily: font }}
-                        className={'block w-[25px] h-[25px]'}>
-                        인
-                      </span>
-                    )}
-                  </Fragment>
-                }
-              />
+                style={{ fontFamily: font }}
+                className={`border-4 border-solid font-bold border-red-600  z-10 text-[red] text-[24px] grid items-center justify-center p-[5px] cursor-pointer ${shape(value)}`}
+                onClick={() => handleOnClickStamp(font)}>
+                {textFormat(`${name}${value !== 0 && value !== 3 ? '인' : ''}`)}
+              </div>
             );
           })
         ) : (
@@ -132,12 +95,16 @@ const StampTabs = ({ name, setStamps }) => {
             />
           </SignBox>
         )}
-        <div className={'w-full flex flex-col items-center my-4'}>
-          <div className={'text-2xl my-4'}>Stamp</div>
-
-          <img src={signImage} alt="" />
-        </div>
       </StampBox>
+      <div className={'w-full flex flex-col items-center my-4 gap-[20px]'}>
+        <div className={'text-2xl'}>Stamp</div>
+        <img
+          src={signImage}
+          alt=""
+          className={'cursor-pointer'}
+          onClick={() => setStamps(signImage)}
+        />
+      </div>
     </Box>
   );
 };

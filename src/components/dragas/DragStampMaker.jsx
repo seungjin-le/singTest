@@ -3,9 +3,16 @@ import Draggable from 'react-draggable';
 import DragReSizing from './DragReSizing';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import MakerLine from '../dragPositionLine/MakerLine';
-import { Tooltip } from '@mui/material';
+import TextToolTip from '../toolTips/TextToolTip';
 
-const DragStampMaker = ({ item, setState, style, onDelete, mode }) => {
+const DragStampMaker = ({
+  item,
+  setState,
+  style,
+  onDelete,
+  mode,
+  isDownloading,
+}) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const [position, setPosition] = useState(item.offset.position);
@@ -81,7 +88,7 @@ const DragStampMaker = ({ item, setState, style, onDelete, mode }) => {
         onStart={() => setOpacity(true)}
         onStop={handleEnd}
         bounds={'parent'}
-        disabled={mode}
+        disabled={!mode || isDownloading}
         position={position}
         defaultClassName={'z-10'}>
         <div
@@ -104,40 +111,30 @@ const DragStampMaker = ({ item, setState, style, onDelete, mode }) => {
                 height: size.y,
                 userSelect: 'none',
               }}
-              draggable={false}
+              draggable={mode}
             />
           ) : (
-            <Fragment>
-              <span className={'absolute left-1/2 bottom-full z-[0]'}>
-                <Tooltip
-                  title={`${item?.info?.name}님의 사인/도장`}
-                  arrow
-                  open={true}
-                  placement={'top'}
-                  sx={{ zIndex: 0 }}
-                  //children={<Fragment></Fragment>}
-                >
-                  <span> </span>
-                </Tooltip>
-              </span>
+            !isDownloading && (
               <RadioButtonCheckedIcon
                 sx={{ color: 'black', fontSize: size.x, marginRight: 0 }}
               />
-            </Fragment>
+            )
           )}
-          {mouseOver && !mode && (
-            <Fragment>
-              <DragReSizing
-                reSizing={handlerReSizing}
-                onDelete={onDelete}
-                item={item}
-              />
-            </Fragment>
+
+          {!isDownloading && (
+            <TextToolTip item={item} description={'사인/도장'} />
+          )}
+          {!isDownloading && mouseOver && mode && (
+            <DragReSizing
+              reSizing={handlerReSizing}
+              onDelete={onDelete}
+              item={item}
+            />
           )}
         </div>
       </Draggable>
 
-      {!mode && (
+      {!isDownloading && mode && (
         <MakerLine
           item={item}
           disable={mouseOver}

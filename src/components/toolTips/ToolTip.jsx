@@ -31,7 +31,7 @@ const ToolTip = ({ item, onChange }) => {
   return (
     <div
       className={
-        'bg-[gray] w-[250px] absolute top-0 left-1/2 translate-x-m50 translate-y-m100 border-2 border-red-600 rounded-md z-[200]'
+        'bg-[gray] w-[250px] absolute top-0 left-1/2 translate-x-m50 translate-y-m100 border-2 border-red-600 rounded-md '
       }
       onMouseDown={(e) => e.preventDefault()}>
       <div className={'flex flex-row justify-start items-center w-full]'}>

@@ -25,8 +25,8 @@ const DragStamp = ({ style, onDelete, item, setState, mode }) => {
     return type === 0
       ? 'rounded-[40px/100px] flex-col p-1'
       : type === 1
-      ? 'rounded-full flex-row flex-wrap items-center justify-center flex-1 max-w-[80px] min-h-[80px] p-2 pb-3 pt-1'
-      : 'rounded-[0] flex-row flex-wrap items-center justify-center  flex-1 max-w-[70px] min-h-[70px] p-1 pb-2 pt-0';
+        ? 'rounded-full flex-row flex-wrap items-center justify-center flex-1 max-w-[80px] min-h-[80px] p-2 pb-3 pt-1'
+        : 'rounded-[0] flex-row flex-wrap items-center justify-center  flex-1 max-w-[70px] min-h-[70px] p-1 pb-2 pt-0';
   };
 
   const trackPos = (data) => {

@@ -6,7 +6,7 @@ const DragReSizing = ({ reSizing, onDelete, item }) => {
       {reSizing && (
         <span
           className={
-            'absolute w-3 h-3 bg-[red] top-full left-full -translate-x-[90%] -translate-y-[90%] rounded-full cursor-pointer z-20'
+            'absolute w-3 h-3 bg-[red] top-full left-full -translate-x-[50%] -translate-y-[50%] rounded-full cursor-pointer z-20'
           }
           onMouseDown={reSizing}
         />
@@ -18,7 +18,7 @@ const DragReSizing = ({ reSizing, onDelete, item }) => {
             onDelete(item?.id);
           }}
           className={
-            'absolute left-full top-0 px-2 bg-red-400 rounded-full flex items-center justify-center translate-x-m50 translate-y-m50 z-20'
+            'absolute left-full top-0 px-2 bg-red-400 rounded-full flex items-center justify-center -translate-x-1/2 -translate-y-1/2 z-50'
           }>
           x
         </button>

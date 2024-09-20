@@ -4,7 +4,15 @@ import DragReSizing from './DragReSizing';
 import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
 import styled from 'styled-components';
 
-const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
+const DragImageInput = ({
+  item,
+  setState,
+  style,
+  onDelete,
+  mode,
+  disabled = false,
+  isDownloading,
+}) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const imageInputRef = useRef(null);
@@ -35,7 +43,6 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
     ({ clientX, clientY }) => {
       setShowPosLine(false);
       const { x, y } = moveImageInput;
-      console.log(x, y, clientX, clientY);
       if (clientX === x && clientY === y && !item.value)
         return (imageInputRef.current.disabled = false);
 
@@ -78,6 +85,20 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
         y: Math.max(newY, 25),
       };
       setSize(changeSize);
+      setState((prev) => {
+        return prev.map((data) =>
+          data.id === item.id
+            ? {
+                ...data,
+                offset: {
+                  ...data.offset,
+                  width: changeSize.x,
+                  height: changeSize.y,
+                },
+              }
+            : data
+        );
+      });
     };
 
     // 드래그 종료 시 사이즈 저장
@@ -125,7 +146,7 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
         onStart={handleStart}
         onStop={handleEnd}
         bounds={'parent'}
-        disabled={mode}
+        disabled={!mode || isDownloading}
         position={position}>
         <div
           ref={nodeRef}
@@ -143,25 +164,30 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
               height: size.y,
             }}>
             <label
-              className="picture w-full h-full"
-              htmlFor="picture__input"
+              className={`picture w-full h-full ${
+                isDownloading
+                  ? '!bg-inherit hover:!bg-inherit !border-none active:!border-none focus:!shadow-none'
+                  : 'cursor-pointer'
+              }`}
+              htmlFor={`${item.id}__input`}
               tabIndex="0">
               {item.value ? (
                 <img
                   src={item.value}
-                  alt="Image"
+                  alt="Image_Input"
                   className={'h-full'}
-                  onDragStart={(e) => e.preventDefault()}
+                  onDragStart={(e) => !isDownloading && e.preventDefault()}
                 />
               ) : (
                 <span className="picture__image">Add Image</span>
               )}
             </label>
             <input
+              disabled={isDownloading}
               type="file"
               ref={imageInputRef}
-              name="picture__input"
-              id="picture__input"
+              name={`${item.id}__input`}
+              id={`${item.id}__input`}
               className={'hidden select-none'}
               onChange={(e) => handleOnAddImage(e)}
               onClick={(e) => {
@@ -169,7 +195,7 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
               }}
             />
           </InputImage>
-          {mouseOver && !mode && (
+          {!isDownloading && mouseOver && mode && (
             <DragReSizing
               reSizing={handlerReSizing}
               onDelete={onDelete}
@@ -178,7 +204,7 @@ const DragImageInput = ({ item, setState, style, onDelete, mode }) => {
           )}
         </div>
       </Draggable>
-      {!mode && showPosLine && (
+      {!isDownloading && mode && showPosLine && (
         <DefaultPositionLine
           item={item}
           disable={mouseOver}
@@ -203,7 +229,7 @@ const InputImage = styled.div`
     justify-content: center;
     color: #aaa;
     border: 2px dashed currentcolor;
-    cursor: pointer;
+
     font-family: sans-serif;
     transition:
       color 300ms ease-in-out,

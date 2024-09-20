@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import PdfScaleSlider from '../toolTips/PdfScaleSlider';
 import DragTextArea from '../dragas/DragTextArea';
@@ -7,14 +7,18 @@ import PdfView from '../../container/pdf/PdfView';
 import { Button } from '@mui/material';
 import DragStampMaker from '../dragas/DragStampMaker';
 import DragImageInput from '../dragas/DragImageInput';
+import { useSignStore } from '../../stores/signStore';
+import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const TestData = [
   {
     id: 'stampMaker-0',
     type: 'stampMaker',
     info: {
-      name: '이빅빅',
+      name: '홍길동',
       email: 'lebibi@naver.com',
+      type: 'user',
     },
     offset: {
       defaultPosition: {
@@ -42,8 +46,9 @@ const TestData = [
     id: 'textArea-1',
     type: 'textArea',
     info: {
-      name: '박빅빅',
+      name: '이순신',
       email: 'Parkbibi@naver.com',
+      type: 'user',
     },
     offset: {
       defaultPosition: {
@@ -77,8 +82,9 @@ const TestData = [
     id: 'stampMaker-2',
     type: 'stampMaker',
     info: {
-      name: '박빅빅',
+      name: '이순신',
       email: 'Parkbibi@naver.com',
+      type: 'user',
     },
     offset: {
       defaultPosition: {
@@ -106,8 +112,9 @@ const TestData = [
     id: 'stampMaker-3',
     type: 'stampMaker',
     info: {
-      name: '이빅빅',
+      name: '홍길동',
       email: 'lebibi@naver.com',
+      type: 'user',
     },
     offset: {
       defaultPosition: {
@@ -135,8 +142,9 @@ const TestData = [
     id: 'stampMaker-4',
     type: 'stampMaker',
     info: {
-      name: '박빅빅',
+      name: '이순신',
       email: 'Parkbibi@naver.com',
+      type: 'user',
     },
     offset: {
       defaultPosition: {
@@ -164,8 +172,9 @@ const TestData = [
     id: 'stampMaker-5',
     type: 'stampMaker',
     info: {
-      name: '박빅빅',
+      name: '이순신',
       email: 'Parkbibi@naver.com',
+      type: 'user',
     },
     offset: {
       defaultPosition: {
@@ -193,8 +202,9 @@ const TestData = [
     id: 'stampMaker-6',
     type: 'stampMaker',
     info: {
-      name: '이빅빅',
+      name: '홍길동',
       email: 'lebibi@naver.com',
+      type: 'user',
     },
     offset: {
       defaultPosition: {
@@ -220,29 +230,38 @@ const TestData = [
   },
 ];
 
-const Content = ({ params }) => {
+const Content = ({ stamp }) => {
   const dropRef = useRef(null);
-  const [mode, setMode] = useState(false);
-  const [droppedItems, setDroppedItems] = useState([]);
+
+  const { setUItems, getItems } = useSignStore();
+  const [droppedItems, setDroppedItems] = useState(getItems());
   const [scale, setScale] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Dragging Component Delete
-  const handleOnClickDelete = useCallback((id) => {
-    setDroppedItems((items) =>
-      items
-        .filter((item) => item.id !== id)
-        .map((item, index) => ({
+  const nav = useNavigate();
+  const { state } = useLocation();
+  const [isDownloading, setIsDownloading] = useState(false);
+  useEffect(() => {
+    if (stamp && state.name) {
+      setDroppedItems((prev) => {
+        return prev.map((item) => ({
           ...item,
-          id: `${item.type}-${index}`,
-          value: item.value,
-          offset: {
-            ...item.offset,
-            position: { x: 0, y: 0 },
-          },
-        }))
-    );
-  }, []);
+          value:
+            item.type === 'stampMaker' &&
+            item.page === currentPage &&
+            state.name === item.info.name
+              ? stamp
+              : item.value,
+        }));
+      });
+    }
+  }, [stamp]);
+
+  const handleOnClickDelete = useCallback(
+    (id) => {
+      setDroppedItems((items) => items.filter((item) => item.id !== id));
+    },
+    [droppedItems]
+  );
 
   const handleOnChangeTooltip = useCallback(
     ({ target: { value } }, id, type) => {
@@ -293,13 +312,14 @@ const Content = ({ params }) => {
           clientOffset.y - (item.type === 'stampMaker' ? top + 25 : top);
 
         const check = droppedItems.findIndex(({ id }, index) => item.id === id);
-        console.log(item);
+
         if (check === -1) {
           setDroppedItems((prev) => [
             ...prev,
             {
               ...item,
-              id: `${item.type}-${droppedItems.length}`,
+              id: uuidv4(),
+              type: item.type,
               page: currentPage,
               offset: {
                 ...item.offset,
@@ -308,8 +328,8 @@ const Content = ({ params }) => {
                     x < 0
                       ? 0
                       : x > pdfViewPage.offsetWidth
-                      ? pdfViewPage.offsetWidth - item.offset.width
-                      : x,
+                        ? pdfViewPage.offsetWidth - item.offset.width
+                        : x,
                   y: y,
                 },
                 position: { x: 0, y: 0 },
@@ -325,6 +345,25 @@ const Content = ({ params }) => {
     drop(node);
     dropRef.current = node;
   }, []);
+
+  const handleOnClickSave = useCallback(() => {
+    setUItems(droppedItems);
+  }, [droppedItems]);
+
+  const handleOnClickPage = useCallback(
+    (name = '', email = '', role = '') => {
+      nav('/', {
+        replace: true,
+        state: {
+          name,
+          email,
+          role,
+        },
+      });
+    },
+    [nav]
+  );
+
   return (
     <div
       className={
@@ -332,14 +371,46 @@ const Content = ({ params }) => {
       }>
       <div
         className={
-          'w-full h-full flex-col items-center justify-center overflow-y-scroll overflow-x-hidden'
+          'absolute left-[10px] top-[10px] flex flex-col gap-[10px] [&>*]:text-[24px] [&>*]:rounded-[5px] [&>*]:p-[10px] [&>*]:bg-[rgba(224_242_254)] [&>*]:cursor-pointer z-[100]'
+        }>
+        <button
+          onClick={() =>
+            handleOnClickPage('이승진', 'leesungjin@naver.com', 'admin')
+          }>
+          관리자 접속
+        </button>
+        <button
+          onClick={() =>
+            handleOnClickPage('이순신', 'bibibig@naver.com', 'user')
+          }>
+          이순신 접속
+        </button>
+        <button
+          onClick={() =>
+            handleOnClickPage('홍길동', 'lebibi@naver.com', 'user')
+          }>
+          홍길동 접속
+        </button>
+        <button
+          onClick={() =>
+            handleOnClickPage('최배달', 'Parkbibi@naver.com', 'user')
+          }>
+          최배달 접속
+        </button>
+      </div>
+
+      <div
+        className={
+          'w-full h-full flex-col items-center justify-center overflow-y-auto overflow-x-hidden'
         }
         style={{ transform: `scale(${scale}, ${scale})` }}>
-        <div className={'flex flex-row items-center justify-center py-4'}>
-          <Button variant="contained" onClick={() => setMode(!mode)}>
-            Mode Change
-          </Button>
-          <span className={'mx-4'} />
+        <div
+          className={
+            'flex flex-row items-center justify-center py-4 gap-[20px]'
+          }>
+          <div className={'ml-4 text-2xl flex items-center'}>
+            {state.name || ''}
+          </div>
           <Button
             variant="contained"
             onClick={() =>
@@ -347,10 +418,14 @@ const Content = ({ params }) => {
             }>
             {droppedItems.length !== 0 ? '데이터 삭제' : '데이터 불러오기'}
           </Button>
-          <div className={'ml-4 text-3xl'}>{mode ? 'User' : 'Admin'}</div>
+          <Button variant="contained" onClick={() => handleOnClickSave()}>
+            Save
+          </Button>
         </div>
         <PdfView
           combinedRef={combinedRef}
+          setIsDownloading={setIsDownloading}
+          isDownloading={isDownloading}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}>
           {droppedItems.map((item, index) => {
@@ -361,7 +436,17 @@ const Content = ({ params }) => {
               left: defaultPosition.x,
               fontFamily: item?.offset?.fontSet?.fontFamily || '',
             };
-            if (params?.name && item?.info?.name !== params?.name) return;
+
+            const { name, email, role } = state;
+            const { info } = item;
+
+            if (
+              role !== 'admin' &&
+              info.type !== 'admin' &&
+              info?.name !== name
+            )
+              return null;
+
             switch (item.type) {
               case 'textArea':
                 return (
@@ -372,7 +457,8 @@ const Content = ({ params }) => {
                     item={item}
                     setState={setDroppedItems}
                     onChange={handleOnChangeTooltip}
-                    mode={mode}
+                    mode={info.name === name || role === 'admin'}
+                    isDownloading={isDownloading}
                   />
                 );
               case 'checkBox':
@@ -383,7 +469,8 @@ const Content = ({ params }) => {
                     onDelete={handleOnClickDelete}
                     item={item}
                     setState={setDroppedItems}
-                    mode={mode}
+                    mode={info.name === name || role === 'admin'}
+                    isDownloading={isDownloading}
                   />
                 );
               case 'stampMaker':
@@ -394,7 +481,8 @@ const Content = ({ params }) => {
                     onDelete={handleOnClickDelete}
                     item={item}
                     setState={setDroppedItems}
-                    mode={mode}
+                    mode={info.name === name || role === 'admin'}
+                    isDownloading={isDownloading}
                   />
                 );
               case 'inputImage':
@@ -405,7 +493,8 @@ const Content = ({ params }) => {
                     onDelete={handleOnClickDelete}
                     item={item}
                     setState={setDroppedItems}
-                    mode={mode}
+                    mode={info.name === name || role === 'admin'}
+                    isDownloading={isDownloading}
                   />
                 );
               default: {

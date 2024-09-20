@@ -4,8 +4,16 @@ import Draggable from 'react-draggable';
 import styled from 'styled-components';
 import DefaultPositionLine from '../dragPositionLine/DefaultPositionLine';
 import DragReSizing from './DragReSizing';
+import TextToolTip from '../toolTips/TextToolTip';
 
-const DragCheckBox = ({ item, setState, style, onDelete, mode }) => {
+const DragCheckBox = ({
+  item,
+  setState,
+  style,
+  onDelete,
+  mode,
+  isDownloading,
+}) => {
   const nodeRef = useRef(null);
   const [mouseOver, setMouseOver] = useState(false);
   const [checkBoxFocus, setCheckBoxFocus] = useState(false);
@@ -99,7 +107,7 @@ const DragCheckBox = ({ item, setState, style, onDelete, mode }) => {
         onStart={handleStart}
         onStop={handleEnd}
         bounds={'parent'}
-        disabled={mode}
+        disabled={!mode || isDownloading}
         position={position}
         defaultClassName={'z-10'}>
         <div
@@ -112,29 +120,20 @@ const DragCheckBox = ({ item, setState, style, onDelete, mode }) => {
           onMouseOver={() => setMouseOver(true)}
           onMouseOut={() => setMouseOver(false)}>
           <CustomCheckbox
+            disabled={isDownloading}
             type="checkbox"
             checked={item.value}
-            onChange={() => checkBoxFocus && handleOnChecked()}
+            onChange={() =>
+              !isDownloading && checkBoxFocus && handleOnChecked()
+            }
             onClick={() => setCheckBoxFocus(true)}
             onBlur={() => setCheckBoxFocus(false)}
             $foucs={checkBoxFocus}
             $infoType={
-              item?.info.type === 'admin' && mode
-                ? 'rgba(255, 252, 127, 0)'
-                : item?.info.type === 'admin' && !mode
-                ? 'rgba(255, 255, 255, 0.7)'
-                : item?.info.type === 'user' && !mode
-                ? 'rgba(255, 252, 127, 0.7)'
-                : 'rgba(255, 255, 255, 0.7)'
+              mode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 252, 127, 0)'
             }
             $checked={
-              item?.info.type === 'admin' && mode
-                ? 'rgba(255, 252, 127, 0)'
-                : item?.info.type === 'admin' && !mode
-                ? 'rgba(255, 255, 255, 0.7)'
-                : item?.info.type === 'user' && !mode
-                ? 'rgba(255, 252, 127, 0.7)'
-                : 'rgba(255, 255, 255, 0.7)'
+              mode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 252, 127, 0)'
             }
             style={{
               opacity: showPosLine ? '0.6' : '1',
@@ -142,19 +141,14 @@ const DragCheckBox = ({ item, setState, style, onDelete, mode }) => {
               height: size.y,
             }}
           />
+
           <span
-            className={`absolute  left-[2px] ${
-              item?.info.type === 'admin' && !mode
-                ? 'z-[-100]'
-                : item?.info.type === 'admin' && mode
-                ? 'z-[100]'
-                : item?.info.type === 'user' && !mode
-                ? 'z-[100]'
-                : 'z-[-100]'
-            }`}
+            className={`absolute  left-[2px] ${!mode ? 'z-[100]' : 'z-[-100]'}`}
             style={{ width: size.x - 4, height: size.y - 1 }}
           />
-          {mouseOver && !mode && (
+
+          {!isDownloading && <TextToolTip item={item} description={'확인'} />}
+          {!isDownloading && mouseOver && mode && (
             <DragReSizing
               reSizing={handlerReSizing}
               onDelete={onDelete}
@@ -163,7 +157,7 @@ const DragCheckBox = ({ item, setState, style, onDelete, mode }) => {
           )}
         </div>
       </Draggable>
-      {!mode && showPosLine && (
+      {!isDownloading && mode && showPosLine && (
         <DefaultPositionLine
           item={item}
           disable={mouseOver}
@@ -211,6 +205,5 @@ const CustomCheckbox = styled.input`
   }
   &[type='checkbox']:checked:after {
     content: 'ON';
-    //background: rgba(0, 0, 0, 0.5);
   }
 `;

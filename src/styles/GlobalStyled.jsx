@@ -25,7 +25,7 @@ const GlobalStyled = createGlobalStyle`
     font-display: swap;
   }
 
-  // 솔뫼 김대건체
+  // 솔뫼 김대건체             
   @font-face {
     font-family: 'kdg_Medium';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts-20-12@1.0/kdg_Medium.woff') format('woff');
@@ -54,15 +54,20 @@ const GlobalStyled = createGlobalStyle`
    .MuiTooltip-popper {
      z-index: 0 !important;
    }
+
    body {
      -webkit-user-select:none;
      -moz-user-select:none;
      -ms-user-select:none;
      user-select:none
-   }
+    
+   }   
    img {
-      user-drag: none;
-   }
+        user-select: none;
+        display:inline-block !important;
+       }
+   
+
 `;
 
 export default GlobalStyled;

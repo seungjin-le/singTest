@@ -4,8 +4,9 @@ import Content from '../components/content/Content';
 import { useParams } from 'react-router-dom';
 
 const Main = () => {
-  let params = useParams();
+  const params = useParams();
   const [stamp, setStamp] = useState('');
+
   return (
     <div className={'w-full h-full flex flex-row'}>
       <Nav params={params} setStamp={setStamp} />
