@@ -36,6 +36,7 @@ const NavSignStamp = ({ type, value }) => {
       ref={combinedRef}
       className={'w-full h-[200px] flex items-center justify-center'}>
       {value && <img src={value} alt={'sign'} className={' max-h-[200px]'} />}
+      asd
     </div>
   );
 };

@@ -98,9 +98,10 @@ const StampTabs = ({ name, setStamps }) => {
       </StampBox>
       <div className={'w-full flex flex-col items-center my-4 gap-[20px]'}>
         <div className={'text-2xl'}>Stamp</div>
+
         <img
           src={signImage}
-          alt=""
+          alt="sign_Image"
           className={'cursor-pointer'}
           onClick={() => setStamps(signImage)}
         />

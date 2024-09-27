@@ -60,7 +60,7 @@ const PdfView = ({
       setTimeout(async () => {
         await html2canvas(input, {
           useCORS: true,
-          scale: 4,
+          scale: 2,
         }).then((canvas) => {
           setComponents((prev) => [...prev, canvas.toDataURL('image/png', 1)]);
           if (pagesRendered <= numPages) setPagesRendered((prev) => prev + 1);

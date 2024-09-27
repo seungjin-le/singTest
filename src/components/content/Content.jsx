@@ -254,7 +254,7 @@ const Content = ({ stamp }) => {
         }));
       });
     }
-  }, [stamp]);
+  }, [stamp, currentPage]);
 
   const handleOnClickDelete = useCallback(
     (id) => {
@@ -409,7 +409,7 @@ const Content = ({ stamp }) => {
             'flex flex-row items-center justify-center py-4 gap-[20px]'
           }>
           <div className={'ml-4 text-2xl flex items-center'}>
-            {state.name || ''}
+            {state?.name || ''}
           </div>
           <Button
             variant="contained"
