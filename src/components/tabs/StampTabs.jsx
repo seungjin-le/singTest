@@ -48,25 +48,23 @@ const StampTabs = ({ name, setStamps }) => {
     return type === 0
       ? 'rounded-[40px/100px] flex-col p-1'
       : type === 1
-      ? 'rounded-full flex-row flex-wrap items-center justify-center flex-1 max-w-[80px] min-h-[80px] p-2 '
-      : 'rounded-[0] flex-row flex-wrap items-center justify-center  flex-1 max-w-[70px] min-h-[70px] p-1  ';
+        ? 'rounded-full flex-row flex-wrap items-center justify-center flex-1 max-w-[80px] min-h-[80px] p-2 '
+        : 'rounded-[0] flex-row flex-wrap items-center justify-center  flex-1 max-w-[70px] min-h-[70px] p-1  ';
   };
   const handleCanvasEnd = () => {
     setSignImage(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
     setStamps(canvasSign.current.getTrimmedCanvas().toDataURL('image/png'));
   };
   const handleOnClickStamp = async (id) => {
-    console.log(id);
     const stamp = document.getElementById(id);
-    console.log(stamp);
+
     await html2canvas(stamp, {
       backgroundColor: null,
-    }).then((canvas) => setSignImage(canvas.toDataURL('image/jpg')));
-
-    //const imgData = canvas.toDataURL('image/jpg');
-    // console.log(imgData);
-    // setStamps(imgData);
-    //setSignImage(imgData);
+    }).then((canvas) => {
+      const img = canvas.toDataURL('image/jpg');
+      setSignImage(img);
+      setStamps(img);
+    });
   };
 
   return (
@@ -134,7 +132,6 @@ const StampTabs = ({ name, setStamps }) => {
         )}
         <div className={'w-full flex flex-col items-center my-4'}>
           <div className={'text-2xl my-4'}>Stamp</div>
-
           <img src={signImage} alt="" />
         </div>
       </StampBox>

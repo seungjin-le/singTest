@@ -220,7 +220,7 @@ const TestData = [
   },
 ];
 
-const Content = ({ params }) => {
+const Content = ({ params, stamp }) => {
   const dropRef = useRef(null);
   const [mode, setMode] = useState(false);
   const [droppedItems, setDroppedItems] = useState([]);
@@ -308,8 +308,8 @@ const Content = ({ params }) => {
                     x < 0
                       ? 0
                       : x > pdfViewPage.offsetWidth
-                      ? pdfViewPage.offsetWidth - item.offset.width
-                      : x,
+                        ? pdfViewPage.offsetWidth - item.offset.width
+                        : x,
                   y: y,
                 },
                 position: { x: 0, y: 0 },

@@ -14,7 +14,12 @@ import jsPDF from 'jspdf';
 import styled from 'styled-components';
 
 import { Pagination } from '@mui/material';
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+// https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.mjs
+
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs`;
+
+// `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
   const [numPages, setNumPages] = useState(null);
@@ -48,9 +53,8 @@ const PdfView = ({ combinedRef, children, currentPage, setCurrentPage }) => {
       const canvas = await html2canvas(input);
       const imgData = canvas.toDataURL('image/png', 1);
       setComponents((prev) => [...prev, imgData]);
-      if (pagesRendered !== numPages) {
-        setPagesRendered((prev) => prev + 1);
-      }
+
+      if (pagesRendered !== numPages) setPagesRendered((prev) => prev + 1);
     }, 500);
   }, [components, pagesRendered, downloading, children]);
 
